@@ -1,11 +1,11 @@
 import tkinter as tk
+import os
+import pathlib
 
 # Global variables
 # "pieces" maps squares to what piece occupies it
 FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 pieces = {}
-
-images = {}
 
 
 class Square:
@@ -31,23 +31,21 @@ class Board:
                 piece = ""
                 for i in pieces.keys():
                     if (i.col == col) and (i.row == row):
-                        piece = pieces[i].colour[0] + pieces[i].piece_type
-
-                for i in pieces:
-                    pass  # print(i.col, i.row, pieces[i].colour, pieces[i].piece_type)
+                        piece = pieces[i].colour[0] + pieces[i].piece_type + ".png"
 
                 # determines the colour of each square
                 if(row+col) % 2 == 0:
                     colour = "white"
                 else:
-                    colour = "black"
+                    colour = "purple"
 
                 # Draws the squares
                 # Use Buttons instead of canvas? And can we drag an image like on lichess to move? not so important
                 temp = tk.Canvas(root, width=50, height=50, bg=colour, bd=0,
                                  highlightthickness=0, relief='ridge')
                 # TODO - images instead of the letter (do that here)
-                temp.create_text(10, 10, text=piece, fill="magenta")
+                if piece != "":
+                    temp.create_image(25,25,image=images[piece])
                 temp.grid(row=row, column=col)
 
 
@@ -88,6 +86,15 @@ def read_pieces():
 
 if __name__ == "__main__":
     root = tk.Tk()
+
+    global images
+    images = {}
+    local_dir = pathlib.Path(__file__).parent.absolute()
+    image_dir = os.path.join(local_dir, "images")
+    for filename in os.listdir(image_dir):
+        images[filename] = tk.PhotoImage(file=image_dir+"/"+filename)
+    print(images)
+
     read_pieces()
 
     for p in pieces:
