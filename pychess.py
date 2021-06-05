@@ -5,7 +5,6 @@ import tkinter as tk
 FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 pieces = {}
 
-gi
 images = {}
 
 
@@ -32,7 +31,7 @@ class Board:
                 piece = ""
                 for i in pieces.keys():
                     if (i.col == col) and (i.row == row):
-                        piece = pieces[i].piece_type
+                        piece = pieces[i].colour[0] + pieces[i].piece_type
 
                 for i in pieces:
                     pass  # print(i.col, i.row, pieces[i].colour, pieces[i].piece_type)
@@ -80,9 +79,9 @@ def read_pieces():
             piece_type = char
 
             if char.isupper():
-                colour = "black"
-            else:
                 colour = "white"
+            else:
+                colour = "black"
             pieces[squ] = Piece(colour, piece_type)
             col += 1
 
