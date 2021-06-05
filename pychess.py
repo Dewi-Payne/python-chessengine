@@ -23,6 +23,7 @@ class Board:
     def draw(self):
         # method for drawing the board based on the
         # position of pieces in the pieces dict
+        b = tk.Canvas(root)
         for col in range(8):
             for row in range(8):
                 # Initialises the piece string to empty
@@ -53,6 +54,12 @@ class Piece:
     def __init__(self, colour=None, piece_type=None):
         self.colour = colour
         self.piece_type = piece_type
+
+
+class Move:
+    def __init__(self, square_from, square_to):
+        self.square_from = square_from
+        self.square_to = square_to
 
 
 def read_pieces():
