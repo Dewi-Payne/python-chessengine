@@ -5,6 +5,9 @@ import tkinter as tk
 FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 pieces = {}
 
+gi
+images = {}
+
 
 class Square:
     # class that represents a square
