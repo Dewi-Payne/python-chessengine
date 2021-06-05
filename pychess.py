@@ -43,7 +43,6 @@ class Board:
                 # Use Buttons instead of canvas? And can we drag an image like on lichess to move? not so important
                 temp = tk.Canvas(root, width=50, height=50, bg=colour, bd=0,
                                  highlightthickness=0, relief='ridge')
-                # TODO - images instead of the letter (do that here)
                 if piece != "":
                     temp.create_image(25,25,image=images[piece])
                 temp.grid(row=row, column=col)
