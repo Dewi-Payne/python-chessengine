@@ -53,13 +53,15 @@ class Board:
                 # Use Buttons instead of canvas? And can we drag an image like on lichess to move? not so important
                 temp = tk.Canvas(root, width=50, height=50, bg=colour, bd=0,
                                  highlightthickness=0, relief='ridge')
+
                 squares[temp] = Square(col, row)
+
                 if piece != "":
                     temp.create_image(25, 25, image=images[piece])
 
                 # This binds the canvas to a function used to make moves
                 temp.bind("<Button-1>", lambda e, t=temp: square_clicked(e, t))
-                temp.bind("<Button-2>", lambda: clear_move())
+                temp.bind("<Button-3>", lambda e: clear_move())
 
                 temp.grid(row=row, column=col)
 
@@ -76,41 +78,44 @@ class Move:
     def __init__(self, square_from, square_to):
         self.square_from = square_from
         self.square_to = square_to
-        print(square_to.col, square_to.row)
-        for square in list(pieces.keys()):
-            if square.col == square_from.col and square.row == square_from.row:
-                square_from = square
-            if square.col == square_to.col and square.row == square_to.row:
-                square_to = square
 
+        try:
+            # This is a lazy way of doing it, maybe a method in
+            # the square class could do this better
+            for square in list(pieces.keys()):
+                if square.col == square_from.col and square.row == square_from.row:
+                    square_from = square
+                if square.col == square_to.col and square.row == square_to.row:
+                    square_to = square
 
-        pieces.pop(square_to)
-        pieces[square_to] = pieces[square_from]
-        pieces.pop(square_from)
+            #
+            pieces[square_to] = pieces[square_from]
+            pieces.pop(square_from)
+
+        except:
+            clear_move()
 
         board.draw()
 
 
-def move_piece():
-    board.draw()
-
-
 def square_clicked(event, obj):
+    obj.config(bg="red")
     global move_from
     if move_from is None:
         move_from = obj
     else:
         if move_from == obj:
             move_from = None
+            board.draw()
             return
         move = Move(squares[move_from], squares[obj])
         move_from = None
 
 
 def clear_move():
+    board.draw()
     global move_from
     move_from = None
-    print("cleared")
 
 
 def read_pieces():
