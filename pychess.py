@@ -21,7 +21,7 @@ class Board:
     def __init__(self):
         # Initialises the board and calls functions to create squares, read the pieces from FEN then draw the board.
         # TODO - Work on the frontend, like how the board looks
-        # TODO - Also need to add an input field that works with
+        # TODO - Also need to add an input field that works with FEN and is updated when a move is made
         self.squares = []
         self.initialise_squares()
         self.read_pieces()
@@ -50,7 +50,7 @@ class Board:
                 # before checking it it is occupied by a piece
 
                 piece = ""
-                # TODO [A] - Equality between square objects - Make a function there to check if coords are the same
+                # TODO [A] - Equality between square objects - Make a function there to check if co-ords are the same
                 for square in self.squares:
                     if (square.col == col) and (square.row == row):
                         if square.piece is not None:
@@ -106,7 +106,7 @@ class Board:
                 # If the FEN string has a number, skip that many columns over
                 col += int(char)
             else:
-                # This part creates a piece and
+                # This part creates the piece object and assigns it to the correct square
                 piece_type = char
 
                 if char.isupper():
