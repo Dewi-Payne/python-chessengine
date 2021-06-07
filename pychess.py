@@ -122,34 +122,39 @@ class Piece:
         self.piece_type = piece_type
 
 
+def check_legality(move):
+    # Function for checking move legality; only makes sure the square from isn't blank
+    # and if the pieces are of the same colour
+    if move.square_from.piece is None:
+        board.draw()
+        return False
+    if move.square_to.piece is not None:
+        if move.square_from.piece.colour == move.square_to.piece.colour:
+            board.draw()
+            return False
+    return True
+
+
 class Move:
     # TODO - Change into a function instead of a class??
     def __init__(self, square_from, square_to):
         self.square_from = square_from
         self.square_to = square_to
 
-
         # This is a lazy way of doing it, maybe a method in
         # the square class could do this better
         for square in list(board.squares):
             if square.col == square_from.col and square.row == square_from.row:
-                square_from = square
+                self.square_from = square
             if square.col == square_to.col and square.row == square_to.row:
-                square_to = square
+                self.square_to = square
 
-        # This is some basic move legality checks, should be its own function probably
-        if square_from.piece is None:
+        if not check_legality(self):
             board.draw()
             return
-        if square_to.piece is not None:
-            if square_from.piece.colour == square_to.piece.colour:
-                board.draw()
-                return
 
-
-        square_to.piece = square_from.piece
-        square_from.piece = None
-
+        self.square_to.piece = self.square_from.piece
+        self.square_from.piece = None
 
         board.draw()
 
