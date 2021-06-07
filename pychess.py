@@ -46,42 +46,37 @@ class Board:
         self.clear_pieces()
         for row in range(8):
             for col in range(8):
-                # Initialises the piece string to empty
-                # before checking it it is occupied by a piece
+                # Fetches the correct square object to assign its canvas and to read its piece information for drawing
+                square = self.get_square(Square(col, row))
 
-                piece = ""
-                # TODO [A] - Equality between square objects - Make a function there to check if co-ords are the same
-                for square in self.squares:
-                    if (square.col == col) and (square.row == row):
-                        if square.piece is not None:
-                            # TODO - figure out a better way than just adding strings to get the file name
-                            piece = square.piece.colour[0] + square.piece.piece_type + ".png"
-
-                # determines the colour of each square
+                # Determines the colour of each square
                 if (row + col) % 2 == 0:
                     colour = "white"
                 else:
                     colour = "purple"
 
-                # Draws the squares
+                # Creates canvas to represent each square of the correct colour
                 # TODO - Research if drag and drop is possible with this setup
                 temp = tk.Canvas(root, width=50, height=50, bg=colour, bd=0,
                                  highlightthickness=0, relief='ridge')
 
-                # Finds the matching square and sets its canvas field to the temporary canvas object we made above
-                # TODO [A] - Same as the other TODOs tagged [A]
-                for element in self.squares:
-                    if element.row == row and element.col == col:
+                # Sets the square from the list of squares' canvas to the one we made above,
+                # and binds the commands to it
+                square.canvas = temp
+                temp.bind("<Button-1>", lambda e, s=square: square_clicked(e, s))
+                temp.bind("<Button-3>", lambda e: clear_move())
 
-                        element.canvas = temp
-                        temp.bind("<Button-1>", lambda e, s=element: square_clicked(e, s))
-                        temp.bind("<Button-3>", lambda e: clear_move())
-
-                # If the square has a piece then it draws it here
-                if piece != "":
+                # Places the appropriate piece
+                if square.piece is not None:
+                    piece = square.piece.colour[0] + square.piece.piece_type + ".png"
                     temp.create_image(24, 25, image=images[piece])
 
                 temp.grid(row=row, column=col)
+
+    def get_square(self, square):
+        for element in self.squares:
+            if element.col == square.col and element.row == square.row:
+                return element
 
     def read_pieces(self):
         # This function reads a FEN string and places them in
@@ -108,18 +103,15 @@ class Board:
             else:
                 # This part creates the piece object and assigns it to the correct square
                 piece_type = char
+                square = self.get_square(Square(col, row))
+                col += 1
 
                 if char.isupper():
                     colour = "white"
                 else:
                     colour = "black"
 
-                # TODO [A] - again this should become a function
-                for element in self.squares:
-                    if element.row == row and element.col == col:
-                        element.piece = Piece(colour, piece_type)
-
-                col += 1
+                square.piece = Piece(colour, piece_type)
 
 
 class Piece:
