@@ -42,7 +42,7 @@ class Board:
 
     def draw(self):
         # method for drawing the board based on the
-        # position of pieces in the pieces dict
+        # position of pieces in the board.squares list
         self.clear_pieces()
         for row in range(8):
             for col in range(8):
@@ -145,7 +145,7 @@ def check_legality(move):
 
 
 class Move:
-    # TODO - Change into a function instead of a class??
+    # TODO - Move most of this to a function to leave the class move as a basic data structure that just stores squares
     def __init__(self, square_from, square_to):
         self.square_from = square_from
         self.square_to = square_to
@@ -177,7 +177,7 @@ def square_clicked(event, square):
 
     global move_from
     if move_from is None:
-        # TODO - Some way to colour in all the squares you can legally move to with that piece would be nice
+        # TODO - Find some way to colour in all the squares you can legally move to with that piece would be nice
         square.canvas.config(bg="red")
         move_from = square
 
@@ -186,7 +186,7 @@ def square_clicked(event, square):
             move_from = None
             board.draw()
             return
-        move = Move(move_from, square)
+        Move(move_from, square)
         move_from = None
 
 
