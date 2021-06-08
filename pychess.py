@@ -44,7 +44,6 @@ class Board:
     def draw(self):
         # method for drawing the board based on the
         # position of pieces in the board.squares list
-        self.clear_pieces()
         for row in range(8):
             for col in range(8):
                 # Fetches the correct square object to assign its canvas and to read its piece information for drawing
@@ -127,6 +126,7 @@ def check_legality(move):
     # or if the pieces are of the same colour (so far).
     # returns True if move is legal, False otherwise
     # TODO - Lots to do for checking move legality
+
     if move.square_from.piece is None:
         # If you're trying to move an empty square, it fails
         return False
@@ -134,8 +134,27 @@ def check_legality(move):
         if move.square_from.piece.colour == move.square_to.piece.colour:
             # If you're trying to capture a piece of the same colour, it fails
             return False
+
     # If it gets here we know a piece is moving and isn't trying to capture its own piece - do more checks here
-    return True
+    if move_from.piece.piece_type == "P":
+        # White pawns
+        # Moving forward if the square is empty
+        if move.square_to == board.get_square(Square(move_from.col, move_from.row - 1)):
+            if move.square_to.piece is None:
+                return True
+        # Moving twice if on the 7th rank
+        if move.square_to == board.get_square(Square(move_from.col, move_from.row - 2)):
+            if move.square_to.piece is None:
+                if move_from.row == 6:
+                    return True
+        # Capturing
+        if move.square_to == board.get_square(Square(move_from.col-1,move_from.row -1)) or \
+                move.square_to == board.get_square(Square(move_from.col+1,move_from.row -1)):
+            if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
+                return True
+
+
+    return False
 
 
 class Move:
@@ -144,11 +163,13 @@ class Move:
     def __init__(self, square_from, square_to):
         self.square_from = board.get_square(square_from)
         self.square_to = board.get_square(square_to)
-        self.is_legal = check_legality(self)
+
+    def is_legal(self):
+        return check_legality(self)
 
     def make_move(self):
         # Takes in an object of class Move then makes the move if it is legal
-        if self.is_legal:
+        if self.is_legal():
             self.square_to.piece = self.square_from.piece
             self.square_from.piece = None
             board.draw()
@@ -168,7 +189,7 @@ def square_clicked(event, square):
         # There's probably a neater way to do this - this is pretty makeshift but it seems to work
         for squ in board.squares:
             if move_from is not squ:
-                if Move(move_from, squ).is_legal:
+                if Move(move_from, squ).is_legal():
                     squ.canvas.create_oval(20,20,30,30,fill="orange")
 
     else:
