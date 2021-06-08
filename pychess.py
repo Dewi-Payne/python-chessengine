@@ -9,11 +9,12 @@ move_from = None
 
 class Square:
     # class that represents a square
-    def __init__(self, col, row, canvas=None, piece=None):
+    def __init__(self, col, row, canvas=None, piece=None, colour=None):
         self.col = col
         self.row = row
         self.canvas = canvas
         self.piece = piece
+        self.colour = colour
 
 
 class Board:
@@ -51,13 +52,13 @@ class Board:
 
                 # Determines the colour of each square
                 if (row + col) % 2 == 0:
-                    colour = "white"
+                    square.colour = "linen"
                 else:
-                    colour = "purple"
+                    square.colour = "PaleVioletRed3"
 
                 # Creates canvas to represent each square of the correct colour
                 # TODO - Research if drag and drop is possible with this setup
-                temp = tk.Canvas(root, width=50, height=50, bg=colour, bd=0,
+                temp = tk.Canvas(root, width=50, height=50, bg=square.colour, bd=0,
                                  highlightthickness=0, relief='ridge')
 
                 # Sets the square from the list of squares' canvas to the one we made above,
@@ -123,32 +124,34 @@ class Piece:
 
 def check_legality(move):
     # Function for checking move legality; only makes sure the square from isn't blank
-    # or if the pieces are of the same colour.
+    # or if the pieces are of the same colour (so far).
     # returns True if move is legal, False otherwise
     # TODO - Lots to do for checking move legality
     if move.square_from.piece is None:
-        board.draw()
+        # If you're trying to move an empty square, it fails
         return False
     if move.square_to.piece is not None:
         if move.square_from.piece.colour == move.square_to.piece.colour:
-            board.draw()
+            # If you're trying to capture a piece of the same colour, it fails
             return False
+    # If it gets here we know a piece is moving and isn't trying to capture its own piece - do more checks here
     return True
 
 
 class Move:
+    # Class that represents a move between two given squares, legality is calculated on creation
     # TODO - Move most of this to a function to leave the class move as a basic data structure that just stores squares
     def __init__(self, square_from, square_to):
         self.square_from = board.get_square(square_from)
         self.square_to = board.get_square(square_to)
         self.is_legal = check_legality(self)
 
-        # moves the piece if legal
+    def make_move(self):
+        # Takes in an object of class Move then makes the move if it is legal
         if self.is_legal:
             self.square_to.piece = self.square_from.piece
             self.square_from.piece = None
-
-        board.draw()
+            board.draw()
 
 
 def square_clicked(event, square):
@@ -156,19 +159,25 @@ def square_clicked(event, square):
     # depending on if you have already started a move or not decides to
     # colour the square and set the move_from to that square or tries to execute a move
     # from the stored square to the current one passed as an argument here named "square"
-
+    square = board.get_square(square)
     global move_from
     if move_from is None:
-        # TODO - Find some way to colour in all the squares you can legally move to with that piece would be nice
         square.canvas.config(bg="red")
         move_from = square
+
+        # There's probably a neater way to do this - this is pretty makeshift but it seems to work
+        for squ in board.squares:
+            if move_from is not squ:
+                if Move(move_from, squ).is_legal:
+                    squ.canvas.create_oval(20,20,30,30,fill="orange")
+
 
     else:
         if move_from == square:
             move_from = None
             board.draw()
             return
-        Move(move_from, square)
+        Move(move_from, square).make_move()
         move_from = None
 
 
