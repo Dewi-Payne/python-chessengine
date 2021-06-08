@@ -123,7 +123,7 @@ class Piece:
 
 def check_legality(move):
     # Function for checking move legality; only makes sure the square from isn't blank
-    # and if the pieces are of the same colour
+    # or if the pieces are of the same colour.
     # returns True if move is legal, False otherwise
     # TODO - Lots to do for checking move legality
     if move.square_from.piece is None:
