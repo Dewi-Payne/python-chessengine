@@ -139,24 +139,14 @@ def check_legality(move):
 class Move:
     # TODO - Move most of this to a function to leave the class move as a basic data structure that just stores squares
     def __init__(self, square_from, square_to):
-        self.square_from = square_from
-        self.square_to = square_to
+        self.square_from = board.get_square(square_from)
+        self.square_to = board.get_square(square_to)
+        self.is_legal = check_legality(self)
 
-        # This is a lazy way of doing it, maybe a method in
-        # the square class could do this better
-        for square in list(board.squares):
-            if square.col == square_from.col and square.row == square_from.row:
-                self.square_from = square
-            if square.col == square_to.col and square.row == square_to.row:
-                self.square_to = square
-
-        self.islegal = check_legality(self)
-        if not self.islegal:
-            board.draw()
-            return
-
-        self.square_to.piece = self.square_from.piece
-        self.square_from.piece = None
+        # moves the piece if legal
+        if self.is_legal:
+            self.square_to.piece = self.square_from.piece
+            self.square_from.piece = None
 
         board.draw()
 
