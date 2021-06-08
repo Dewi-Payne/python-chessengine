@@ -171,7 +171,6 @@ def square_clicked(event, square):
                 if Move(move_from, squ).is_legal:
                     squ.canvas.create_oval(20,20,30,30,fill="orange")
 
-
     else:
         if move_from == square:
             move_from = None
@@ -179,6 +178,7 @@ def square_clicked(event, square):
             return
         Move(move_from, square).make_move()
         move_from = None
+        board.draw()
 
 
 def clear_move():
