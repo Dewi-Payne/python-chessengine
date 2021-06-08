@@ -60,7 +60,7 @@ class Board:
 
                 # Creates canvas to represent each square of the correct colour
                 # TODO - Research if drag and drop is possible with this setup
-                temp = tk.Canvas(root, width=50, height=50, bg=square.colour, bd=0,
+                temp = tk.Canvas(window.board_frame, width=50, height=50, bg=square.colour, bd=0,
                                  highlightthickness=0, relief='ridge')
 
                 # Sets the square from the list of squares' canvas to the one we made above,
@@ -225,6 +225,34 @@ def clear_move():
     board.draw()
 
 
+class Window:
+    def __init__(self):
+        main_frame = tk.Frame(root,width=1200,height=600, bg="white")
+        main_frame.grid(row=0, column=0)
+
+        self.board_frame = tk.Frame(main_frame, height=400, width=400, bd=10, bg="pink")
+        self.board_frame.grid(row=0, column=0)
+
+        right_frame = tk.Frame(root, width=600)
+        right_frame.grid(row=0, column=1, rowspan = 2)
+
+        bottom_left_frame = tk.Frame(root,width=420,height=200)
+        bottom_left_frame.grid(row=1,column=0)
+
+        fen_string_entry = tk.Entry(bottom_left_frame, width=40, relief="flat", bd=4)
+        fen_string_entry.grid(row=0, column=0)
+
+        reset_button = tk.Button(bottom_left_frame, width=10, relief="groove", pady=10, text="Reset", command=lambda: reset())
+        reset_button.grid(row=1, column=0)
+
+
+def reset():
+    board.squares.clear()
+    board.initialise_squares()
+    board.read_pieces()
+    board.draw()
+
+
 if __name__ == "__main__":
     root = tk.Tk()
 
@@ -237,6 +265,9 @@ if __name__ == "__main__":
     image_dir = os.path.join(local_dir, "images")
     for filename in os.listdir(image_dir):
         images[filename] = tk.PhotoImage(file=image_dir + "/" + filename)
+
+    #Makes the window that the board is drawn in
+    window = Window()
 
     # Creates the main board whose __init__ method has calls to other functions to initialise the game
     board = Board()
