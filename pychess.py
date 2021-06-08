@@ -152,7 +152,22 @@ def check_legality(move):
                 move.square_to == board.get_square(Square(move_from.col+1,move_from.row -1)):
             if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
                 return True
-
+    if move_from.piece.piece_type == "p":
+        # black pawns
+        # Moving forward if the square is empty
+        if move.square_to == board.get_square(Square(move_from.col, move_from.row + 1)):
+            if move.square_to.piece is None:
+                return True
+        # Moving twice if on the 2th rank
+        if move.square_to == board.get_square(Square(move_from.col, move_from.row + 2)):
+            if move.square_to.piece is None:
+                if move_from.row == 1:
+                    return True
+        # Capturing
+        if move.square_to == board.get_square(Square(move_from.col-1,move_from.row +1)) or \
+                move.square_to == board.get_square(Square(move_from.col+1,move_from.row +1)):
+            if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
+                return True
 
     return False
 
