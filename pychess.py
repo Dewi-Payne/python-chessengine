@@ -5,6 +5,8 @@ import pathlib
 # Global variables
 FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 move_from = None
+BLACK = -1
+WHITE = 1
 
 
 class Square:
@@ -27,6 +29,7 @@ class Board:
         self.initialise_squares()
         self.read_pieces()
         self.draw()
+        self.turn = WHITE # TODO - set this in board.read_pieces()!
 
     def clear_pieces(self):
         pass
@@ -68,7 +71,11 @@ class Board:
 
                 # Places the appropriate piece
                 if square.piece is not None:
-                    piece = square.piece.colour[0] + square.piece.piece_type + ".png"
+                    # TODO - eew eeew eewww
+                    if square.piece.colour == WHITE:
+                        piece = "w" + square.piece.piece_type + ".png"
+                    else:
+                        piece = "b" + square.piece.piece_type + ".png"
                     temp.create_image(24, 25, image=images[piece])
 
                 temp.grid(row=row, column=col)
@@ -107,9 +114,9 @@ class Board:
                 col += 1
 
                 if char.isupper():
-                    colour = "white"
+                    colour = WHITE
                 else:
-                    colour = "black"
+                    colour = BLACK
 
                 square.piece = Piece(colour, piece_type)
 
@@ -131,6 +138,9 @@ def check_legality(move):
         # If you're trying to move an empty square, it fails
         return False
     if move.square_to.piece is not None:
+        if move.square_from.piece.colour != board.turn:
+            # TODO - This is supposed to stop you moving if it's not your turn but it isn't working IDK why
+            return False
         if move.square_from.piece.colour == move.square_to.piece.colour:
             # If you're trying to capture a piece of the same colour, it fails
             return False
@@ -188,6 +198,7 @@ class Move:
             self.square_to.piece = self.square_from.piece
             self.square_from.piece = None
             board.draw()
+            board.turn = board.turn * -1
 
 
 def square_clicked(event, square):
