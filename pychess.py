@@ -140,42 +140,29 @@ def check_legality(move):
     if move.square_to.piece is not None:
         if move.square_from.piece.colour != board.turn:
             # TODO - This is supposed to stop you moving if it's not your turn but it isn't working IDK why
-            return False
+            # return False
+            pass
         if move.square_from.piece.colour == move.square_to.piece.colour:
             # If you're trying to capture a piece of the same colour, it fails
             return False
 
     # If it gets here we know a piece is moving and isn't trying to capture its own piece - do more checks here
-    if move_from.piece.piece_type == "P":
-        # White pawns
+    if move_from.piece.piece_type.lower() == "p":
+        # Pawns
+        # TODO - en passant, promotion
         # Moving forward if the square is empty
-        if move.square_to == board.get_square(Square(move_from.col, move_from.row - 1)):
+        if move.square_to == board.get_square(Square(move_from.col, move_from.row - move_from.piece.colour)):
             if move.square_to.piece is None:
                 return True
-        # Moving twice if on the 7th rank
-        if move.square_to == board.get_square(Square(move_from.col, move_from.row - 2)):
+        # Moving two squares if on the 2nd or 7th rank
+        if move.square_to == board.get_square(Square(move_from.col, move_from.row - move_from.piece.colour*2)):
             if move.square_to.piece is None:
-                if move_from.row == 6:
+                if move_from.row == 6 or move_from.row == 1:
                     return True
+                    # TODO - This is where a flag to let you check for en passant would go
         # Capturing
-        if move.square_to == board.get_square(Square(move_from.col-1,move_from.row -1)) or \
-                move.square_to == board.get_square(Square(move_from.col+1,move_from.row -1)):
-            if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
-                return True
-    if move_from.piece.piece_type == "p":
-        # black pawns
-        # Moving forward if the square is empty
-        if move.square_to == board.get_square(Square(move_from.col, move_from.row + 1)):
-            if move.square_to.piece is None:
-                return True
-        # Moving twice if on the 2th rank
-        if move.square_to == board.get_square(Square(move_from.col, move_from.row + 2)):
-            if move.square_to.piece is None:
-                if move_from.row == 1:
-                    return True
-        # Capturing
-        if move.square_to == board.get_square(Square(move_from.col-1,move_from.row +1)) or \
-                move.square_to == board.get_square(Square(move_from.col+1,move_from.row +1)):
+        if move.square_to == board.get_square(Square(move_from.col-1, move_from.row - move_from.piece.colour)) or \
+                move.square_to == board.get_square(Square(move_from.col+1, move_from.row - move_from.piece.colour)):
             if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
                 return True
 
