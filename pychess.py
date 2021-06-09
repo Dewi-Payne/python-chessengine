@@ -53,32 +53,23 @@ class Board:
                 square = self.get_square(Square(col, row))
 
                 # Determines the colour of each square
-                if (row + col) % 2 == 0:
-                    square.colour = "linen"
-                else:
-                    square.colour = "PaleVioletRed3"
+                square.colour = "linen" if (col+row) % 2 == 0 else "PaleVioletRed3"
 
                 # Creates canvas to represent each square of the correct colour
                 # TODO - Research if drag and drop is possible with this setup
-                temp = tk.Canvas(window.board_frame, width=50, height=50, bg=square.colour, bd=0,
+                square.canvas = tk.Canvas(window.board_frame, width=50, height=50, bg=square.colour, bd=0,
                                  highlightthickness=0, relief='ridge')
 
-                # Sets the square from the list of squares' canvas to the one we made above,
-                # and binds the commands to it
-                square.canvas = temp
-                temp.bind("<Button-1>", lambda e, s=square: square_clicked(e, s))
-                temp.bind("<Button-3>", lambda e: clear_move())
+                # Binds commands to the canvas
+                square.canvas.bind("<Button-1>", lambda e, s=square: square_clicked(e, s))
+                square.canvas.bind("<Button-3>", lambda e: clear_move())
 
-                # Places the appropriate piece
+                # If a piece exists it places it
                 if square.piece is not None:
-                    # TODO - eew eeew eewww
-                    if square.piece.colour == WHITE:
-                        piece = "w" + square.piece.piece_type + ".png"
-                    else:
-                        piece = "b" + square.piece.piece_type + ".png"
-                    temp.create_image(24, 25, image=images[piece])
-
-                temp.grid(row=row, column=col)
+                    colour = "w" if square.piece.colour == WHITE else "b"
+                    piece = colour + square.piece.piece_type + ".png"
+                    square.canvas.create_image(24, 25, image=images[piece])
+                square.canvas.grid(row=row, column=col)
 
     def get_square(self, square):
         for element in self.squares:
@@ -242,15 +233,15 @@ class Window:
         fen_string_entry = tk.Entry(bottom_left_frame, width=40, relief="flat", bd=4)
         fen_string_entry.grid(row=0, column=0)
 
-        reset_button = tk.Button(bottom_left_frame, width=10, relief="groove", pady=10, text="Reset", command=lambda: reset())
+        reset_button = tk.Button(bottom_left_frame, width=10, relief="groove", pady=10, text="Reset",
+                                 command=lambda: self.reset())
         reset_button.grid(row=1, column=0)
 
-
-def reset():
-    board.squares.clear()
-    board.initialise_squares()
-    board.read_pieces()
-    board.draw()
+    def reset(self):
+        board.squares.clear()
+        board.initialise_squares()
+        board.read_pieces()
+        board.draw()
 
 
 if __name__ == "__main__":
