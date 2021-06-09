@@ -23,13 +23,11 @@ class Board:
     # class that represents the board
     def __init__(self):
         # Initialises the board and calls functions to create squares, read the pieces from FEN then draw the board.
-        # TODO - Work on the frontend, like how the board looks
-        # TODO - Also need to add an input field that works with FEN and is updated when a move is made
         self.squares = []
         self.initialise_squares()
         self.read_pieces()
         self.draw()
-        self.turn = WHITE # TODO - set this in board.read_pieces()!
+        self.turn = WHITE  # TODO - set this in board.read_pieces()!
 
     def clear_pieces(self):
         pass
@@ -53,12 +51,12 @@ class Board:
                 square = self.get_square(Square(col, row))
 
                 # Determines the colour of each square
-                square.colour = "linen" if (col+row) % 2 == 0 else "PaleVioletRed3"
+                square.colour = "linen" if (col + row) % 2 == 0 else "PaleVioletRed3"
 
                 # Creates canvas to represent each square of the correct colour
                 # TODO - Research if drag and drop is possible with this setup
                 square.canvas = tk.Canvas(window.board_frame, width=50, height=50, bg=square.colour, bd=0,
-                                 highlightthickness=0, relief='ridge')
+                                          highlightthickness=0, relief='ridge')
 
                 # Binds commands to the canvas
                 square.canvas.bind("<Button-1>", lambda e, s=square: square_clicked(e, s))
@@ -138,22 +136,26 @@ def check_legality(move):
             return False
 
     # If it gets here we know a piece is moving and isn't trying to capture its own piece - do more checks here
-    if move_from.piece.piece_type.lower() == "p":
+    if move.square_from.piece.piece_type.lower() == "p":
         # Pawns
         # TODO - en passant, promotion
         # Moving forward if the square is empty
-        if move.square_to == board.get_square(Square(move_from.col, move_from.row - move_from.piece.colour)):
+        if move.square_to == board.get_square(Square(move.square_from.col,
+                                                     move.square_from.row - move.square_from.piece.colour)):
             if move.square_to.piece is None:
                 return True
         # Moving two squares if on the 2nd or 7th rank
-        if move.square_to == board.get_square(Square(move_from.col, move_from.row - move_from.piece.colour*2)):
+        if move.square_to == board.get_square(Square(move.square_from.col,
+                                                     move.square_from.row - move.square_from.piece.colour * 2)):
             if move.square_to.piece is None:
-                if move_from.row == 6 or move_from.row == 1:
+                if move.square_from.row == 6 or move.square_from.row == 1:
                     return True
                     # TODO - This is where a flag to let you check for en passant would go
         # Capturing
-        if move.square_to == board.get_square(Square(move_from.col-1, move_from.row - move_from.piece.colour)) or \
-                move.square_to == board.get_square(Square(move_from.col+1, move_from.row - move_from.piece.colour)):
+        if move.square_to == board.get_square(Square(move.square_from.col - 1,
+                                                     move.square_from.row - move.square_from.piece.colour)) or \
+                move.square_to == board.get_square(Square(move.square_from.col + 1,
+                                                          move.square_from.row - move.square_from.piece.colour)):
             if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
                 return True
 
@@ -194,7 +196,7 @@ def square_clicked(event, square):
         for squ in board.squares:
             if move_from is not squ:
                 if Move(move_from, squ).is_legal():
-                    squ.canvas.create_oval(20,20,30,30,fill="orange")
+                    squ.canvas.create_oval(20, 20, 30, 30, fill="orange")
 
     else:
         if move_from == square:
@@ -218,17 +220,17 @@ def clear_move():
 
 class Window:
     def __init__(self):
-        main_frame = tk.Frame(root,width=1200,height=600, bg="white")
+        main_frame = tk.Frame(root, width=1200, height=600, bg="white")
         main_frame.grid(row=0, column=0)
 
         self.board_frame = tk.Frame(main_frame, height=400, width=400, bd=10, bg="pink")
         self.board_frame.grid(row=0, column=0)
 
         right_frame = tk.Frame(root, width=600)
-        right_frame.grid(row=0, column=1, rowspan = 2)
+        right_frame.grid(row=0, column=1, rowspan=2)
 
-        bottom_left_frame = tk.Frame(root,width=420,height=200)
-        bottom_left_frame.grid(row=1,column=0)
+        bottom_left_frame = tk.Frame(root, width=420, height=200)
+        bottom_left_frame.grid(row=1, column=0)
 
         fen_string_entry = tk.Entry(bottom_left_frame, width=40, relief="flat", bd=4)
         fen_string_entry.grid(row=0, column=0)
@@ -257,7 +259,7 @@ if __name__ == "__main__":
     for filename in os.listdir(image_dir):
         images[filename] = tk.PhotoImage(file=image_dir + "/" + filename)
 
-    #Makes the window that the board is drawn in
+    # Makes the window that the board is drawn in
     window = Window()
 
     # Creates the main board whose __init__ method has calls to other functions to initialise the game
