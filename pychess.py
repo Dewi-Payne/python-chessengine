@@ -154,11 +154,10 @@ def check_legality(move):
                     return True
                     # TODO - This is where a flag to let you check for en passant would go
         # Capturing
-        if move.square_to == board.get_square(Square(move.square_from.col - 1,
-                                                     move.square_from.row - move.square_from.piece.colour)) or \
-                move.square_to == board.get_square(Square(move.square_from.col + 1,
-                                                          move.square_from.row - move.square_from.piece.colour)):
-            if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
+        if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
+            if move.square_to == square_offset(move.square_from, 1, - move.square_from.piece.colour):
+                return True
+            if move.square_to == square_offset(move.square_from, -1, - move.square_from.piece.colour):
                 return True
 
     return False
