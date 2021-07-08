@@ -73,6 +73,7 @@ class Board:
         for element in self.squares:
             if element.col == square.col and element.row == square.row:
                 return element
+        return None
 
     def read_pieces(self):
         # This function reads a FEN string and places them in
@@ -160,7 +161,31 @@ def check_legality(move):
             if move.square_to == square_offset(move.square_from, -1, - move.square_from.piece.colour):
                 return True
 
+    if move.square_from.piece.piece_type.lower() == "r":
+        # Rooks
+        # TODO - clean this up (or leave it as is for readability??)
+        if move.square_to in sliding_move(move.square_from, 0, -1):
+            return True
+        if move.square_to in sliding_move(move.square_from, 0, 1):
+            return True
+        if move.square_to in sliding_move(move.square_from, -1,0):
+            return True
+        if move.square_to in sliding_move(move.square_from, 1, 0):
+            return True
+
     return False
+
+
+def sliding_move(square, col_offset, row_offset):
+    # Returns a list of squares a piece can move to in a given direction
+    # TODO - capturing pieces and probably other rules need to be implemented
+    temp_square = square_offset(square, col_offset, row_offset)
+    if temp_square is None:
+        return [square]
+    if temp_square.piece is not None:
+        return [square]
+    else:
+        return [temp_square] + sliding_move(temp_square, col_offset, row_offset)
 
 
 class Move:
