@@ -126,16 +126,11 @@ def check_legality(move):
     # Function for checking move legality; only makes sure the square from isn't blank
     # or if the pieces are of the same colour (so far).
     # returns True if move is legal, False otherwise
-    # TODO - Lots to do for checking move legality
 
     if move.square_from.piece is None:
         # If you're trying to move an empty square, it fails
         return False
     if move.square_to.piece is not None:
-        if move.square_from.piece.colour != board.turn:
-            # TODO - This is supposed to stop you moving if it's not your turn but it isn't working IDK why
-            # return False
-            pass
         if move.square_from.piece.colour == move.square_to.piece.colour:
             # If you're trying to capture a piece of the same colour, it fails
             return False
@@ -221,6 +216,25 @@ def check_legality(move):
         if move.square_to == square_offset(move.square_from, -1,0):
             return True
 
+    if move.square_from.piece.piece_type.lower() == "n":
+        # Knights
+        if move.square_to == square_offset(move.square_from, 2, 1):
+            return True
+        if move.square_to == square_offset(move.square_from, 2, -1):
+            return True
+        if move.square_to == square_offset(move.square_from, -2, 1):
+            return True
+        if move.square_to == square_offset(move.square_from, -2, -1):
+            return True
+        if move.square_to == square_offset(move.square_from, 1, 2):
+            return True
+        if move.square_to == square_offset(move.square_from, 1, -2):
+            return True
+        if move.square_to == square_offset(move.square_from, -1, 2):
+            return True
+        if move.square_to == square_offset(move.square_from, -1, -2):
+            return True
+
     return False
 
 
@@ -254,10 +268,14 @@ class Move:
         self.square_to = board.get_square(square_to)
 
     def is_legal(self):
-        return check_legality(self)
+        if self.square_from.piece.colour == board.turn:
+            return check_legality(self)
+        else:
+            return False
 
     def make_move(self):
         # Takes in an object of class Move then makes the move if it is legal
+
         if self.is_legal():
             self.square_to.piece = self.square_from.piece
             self.square_from.piece = None
