@@ -173,19 +173,77 @@ def check_legality(move):
         if move.square_to in sliding_move(move.square_from, 1, 0):
             return True
 
+    if move.square_from.piece.piece_type.lower() == "b":
+        # Bishops
+        if move.square_to in sliding_move(move.square_from, -1, -1):
+            return True
+        if move.square_to in sliding_move(move.square_from, 1, -1):
+            return True
+        if move.square_to in sliding_move(move.square_from, 1, 1):
+            return True
+        if move.square_to in sliding_move(move.square_from, -1, 1):
+            return True
+
+    if move.square_from.piece.piece_type.lower() == "q":
+        if move.square_to in sliding_move(move.square_from, -1, -1):
+            return True
+        if move.square_to in sliding_move(move.square_from, 1, -1):
+            return True
+        if move.square_to in sliding_move(move.square_from, 1, 1):
+            return True
+        if move.square_to in sliding_move(move.square_from, -1, 1):
+            return True
+        if move.square_to in sliding_move(move.square_from, 0, -1):
+            return True
+        if move.square_to in sliding_move(move.square_from, 0, 1):
+            return True
+        if move.square_to in sliding_move(move.square_from, -1,0):
+            return True
+        if move.square_to in sliding_move(move.square_from, 1, 0):
+            return True
+
+    if move.square_from.piece.piece_type.lower() == "k" :
+        # Kings
+        if move.square_to == square_offset(move.square_from, 1,1):
+            return True
+        if move.square_to == square_offset(move.square_from, -1,1):
+            return True
+        if move.square_to == square_offset(move.square_from, 1,-1):
+            return True
+        if move.square_to == square_offset(move.square_from, -1,-1):
+            return True
+        if move.square_to == square_offset(move.square_from, 0,-1):
+            return True
+        if move.square_to == square_offset(move.square_from, 0,1):
+            return True
+        if move.square_to == square_offset(move.square_from, 1,0):
+            return True
+        if move.square_to == square_offset(move.square_from, -1,0):
+            return True
+
     return False
 
 
-def sliding_move(square, col_offset, row_offset):
+def sliding_move(square, col_offset, row_offset, original_square=None):
     # Returns a list of squares a piece can move to in a given direction
     # TODO - capturing pieces and probably other rules need to be implemented
+
+    # This is meant to be for capturing
+    if original_square is None:
+        original_square = square
+
     temp_square = square_offset(square, col_offset, row_offset)
     if temp_square is None:
         return [square]
     if temp_square.piece is not None:
+        if temp_square.piece.colour == original_square.colour:
+            return [square]
+        else:
+            return [square] + [temp_square]
         return [square]
+
     else:
-        return [temp_square] + sliding_move(temp_square, col_offset, row_offset)
+        return [temp_square] + sliding_move(temp_square, col_offset, row_offset, original_square)
 
 
 class Move:
