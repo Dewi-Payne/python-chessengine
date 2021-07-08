@@ -342,6 +342,7 @@ class Window:
         reset_button.grid(row=1, column=0)
 
     def reset(self):
+        board.turn = WHITE
         board.squares.clear()
         board.initialise_squares()
         board.read_pieces()
