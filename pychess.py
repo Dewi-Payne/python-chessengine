@@ -117,6 +117,10 @@ class Piece:
         self.piece_type = piece_type
 
 
+def square_offset(square, col, row):
+    return board.get_square(Square(square.col + col, square.row + row))
+
+
 def check_legality(move):
     # Function for checking move legality; only makes sure the square from isn't blank
     # or if the pieces are of the same colour (so far).
@@ -140,13 +144,11 @@ def check_legality(move):
         # Pawns
         # TODO - en passant, promotion
         # Moving forward if the square is empty
-        if move.square_to == board.get_square(Square(move.square_from.col,
-                                                     move.square_from.row - move.square_from.piece.colour)):
+        if move.square_to == square_offset(move.square_from, 0, - move.square_from.piece.colour):
             if move.square_to.piece is None:
                 return True
         # Moving two squares if on the 2nd or 7th rank
-        if move.square_to == board.get_square(Square(move.square_from.col,
-                                                     move.square_from.row - move.square_from.piece.colour * 2)):
+        if move.square_to == square_offset(move.square_from, 0, - move.square_from.piece.colour * 2):
             if move.square_to.piece is None:
                 if move.square_from.row == 6 or move.square_from.row == 1:
                     return True
