@@ -162,65 +162,32 @@ def check_legality(move):
             if move.square_to == square_offset(move.square_from, 1, - move.square_from.piece.colour):
                 return True
 
+    # Movement for sliding pieces
+    # the list here stores the offsets for all 8 directions which sliding pieces can move in
+    sliding_directions = [(1, 1), (-1, 1), (1, -1), (-1, -1), (0, 1), (0, -1), (1, 0), (-1, 0)]
     if move.square_from.piece.piece_type.lower() == "r":
         # Rooks
-        # TODO - clean this up (or leave it as is for readability??)
-        if move.square_to in sliding_move(move.square_from, 0, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 0, 1):
-            return True
-        if move.square_to in sliding_move(move.square_from, -1,0):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, 0):
-            return True
+        for i in range(4, 8):
+            if move.square_to in sliding_move(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
+                return True
 
     if move.square_from.piece.piece_type.lower() == "b":
         # Bishops
-        if move.square_to in sliding_move(move.square_from, -1, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, 1):
-            return True
-        if move.square_to in sliding_move(move.square_from, -1, 1):
-            return True
+        for i in range(4):
+            if move.square_to in sliding_move(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
+                return True
 
     if move.square_from.piece.piece_type.lower() == "q":
-        if move.square_to in sliding_move(move.square_from, -1, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, 1):
-            return True
-        if move.square_to in sliding_move(move.square_from, -1, 1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 0, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 0, 1):
-            return True
-        if move.square_to in sliding_move(move.square_from, -1,0):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, 0):
-            return True
+        # Queens
+        for i in range(8):
+            if move.square_to in sliding_move(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
+                return True
 
-    if move.square_from.piece.piece_type.lower() == "k" :
+    if move.square_from.piece.piece_type.lower() == "k":
         # Kings
-        if move.square_to == square_offset(move.square_from, 1,1):
-            return True
-        if move.square_to == square_offset(move.square_from, -1,1):
-            return True
-        if move.square_to == square_offset(move.square_from, 1,-1):
-            return True
-        if move.square_to == square_offset(move.square_from, -1,-1):
-            return True
-        if move.square_to == square_offset(move.square_from, 0,-1):
-            return True
-        if move.square_to == square_offset(move.square_from, 0,1):
-            return True
-        if move.square_to == square_offset(move.square_from, 1,0):
-            return True
-        if move.square_to == square_offset(move.square_from, -1,0):
-            return True
+        for i in range(8):
+            if move.square_to == square_offset(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
+                return True
 
     if move.square_from.piece.piece_type.lower() == "n":
         # Knights
@@ -260,7 +227,6 @@ def sliding_move(square, col_offset, row_offset, original_square=None):
             return [square]
         else:
             return [square] + [temp_square]
-        return [square]
 
     else:
         return [temp_square] + sliding_move(temp_square, col_offset, row_offset, original_square)
@@ -373,7 +339,6 @@ if __name__ == "__main__":
     # This just fetches images from the folder images, creates tkinter PhotoImage classes
     # and stores them in a dictionary with the file name as the key for easy access
     # TODO - there's got to be a cleaner way of both retrieving the files, and maybe don't rely on file names?
-    global images
     images = {}
     local_dir = pathlib.Path(__file__).parent.absolute()
     image_dir = os.path.join(local_dir, "images")
