@@ -156,65 +156,32 @@ def check_legality(move):
             if move.square_to == square_offset(move.square_from, -1, - move.square_from.piece.colour):
                 return True
 
+    # Movement for sliding pieces
+    # the list here stores the offsets for all 8 directions which sliding pieces can move in
+    sliding_directions = [(1, 1), (-1, 1), (1, -1), (-1, -1), (0, 1), (0, -1), (1, 0), (-1, 0)]
     if move.square_from.piece.piece_type.lower() == "r":
         # Rooks
-        # TODO - clean this up (or leave it as is for readability??)
-        if move.square_to in sliding_move(move.square_from, 0, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 0, 1):
-            return True
-        if move.square_to in sliding_move(move.square_from, -1,0):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, 0):
-            return True
+        for i in range(4,8):
+            if move.square_to in sliding_move(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
+                return True
 
     if move.square_from.piece.piece_type.lower() == "b":
         # Bishops
-        if move.square_to in sliding_move(move.square_from, -1, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, 1):
-            return True
-        if move.square_to in sliding_move(move.square_from, -1, 1):
-            return True
+        for i in range(4):
+            if move.square_to in sliding_move(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
+                return True
 
     if move.square_from.piece.piece_type.lower() == "q":
-        if move.square_to in sliding_move(move.square_from, -1, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, 1):
-            return True
-        if move.square_to in sliding_move(move.square_from, -1, 1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 0, -1):
-            return True
-        if move.square_to in sliding_move(move.square_from, 0, 1):
-            return True
-        if move.square_to in sliding_move(move.square_from, -1,0):
-            return True
-        if move.square_to in sliding_move(move.square_from, 1, 0):
-            return True
+        # Queens
+        for i in range(8):
+            if move.square_to in sliding_move(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
+                return True
 
     if move.square_from.piece.piece_type.lower() == "k" :
         # Kings
-        if move.square_to == square_offset(move.square_from, 1,1):
-            return True
-        if move.square_to == square_offset(move.square_from, -1,1):
-            return True
-        if move.square_to == square_offset(move.square_from, 1,-1):
-            return True
-        if move.square_to == square_offset(move.square_from, -1,-1):
-            return True
-        if move.square_to == square_offset(move.square_from, 0,-1):
-            return True
-        if move.square_to == square_offset(move.square_from, 0,1):
-            return True
-        if move.square_to == square_offset(move.square_from, 1,0):
-            return True
-        if move.square_to == square_offset(move.square_from, -1,0):
-            return True
+        for i in range(8):
+            if move.square_to == square_offset(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
+                return True
 
     if move.square_from.piece.piece_type.lower() == "n":
         # Knights
@@ -268,10 +235,13 @@ class Move:
         self.square_to = board.get_square(square_to)
 
     def is_legal(self):
-        if self.square_from.piece.colour == board.turn:
-            return check_legality(self)
+        if self.square_from.piece is not None:
+            if self.square_from.piece.colour == board.turn:
+                return check_legality(self)
+            else:
+                return False
         else:
-            return False
+            return check_legality(self)
 
     def make_move(self):
         # Takes in an object of class Move then makes the move if it is legal
