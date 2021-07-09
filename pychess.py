@@ -161,7 +161,7 @@ def check_legality(move):
     sliding_directions = [(1, 1), (-1, 1), (1, -1), (-1, -1), (0, 1), (0, -1), (1, 0), (-1, 0)]
     if move.square_from.piece.piece_type.lower() == "r":
         # Rooks
-        for i in range(4,8):
+        for i in range(4, 8):
             if move.square_to in sliding_move(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
                 return True
 
@@ -177,7 +177,7 @@ def check_legality(move):
             if move.square_to in sliding_move(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
                 return True
 
-    if move.square_from.piece.piece_type.lower() == "k" :
+    if move.square_from.piece.piece_type.lower() == "k":
         # Kings
         for i in range(8):
             if move.square_to == square_offset(move.square_from, sliding_directions[i][0], sliding_directions[i][1]):
@@ -221,7 +221,6 @@ def sliding_move(square, col_offset, row_offset, original_square=None):
             return [square]
         else:
             return [square] + [temp_square]
-        return [square]
 
     else:
         return [temp_square] + sliding_move(temp_square, col_offset, row_offset, original_square)
@@ -325,7 +324,6 @@ if __name__ == "__main__":
     # This just fetches images from the folder images, creates tkinter PhotoImage classes
     # and stores them in a dictionary with the file name as the key for easy access
     # TODO - there's got to be a cleaner way of both retrieving the files, and maybe don't rely on file names?
-    global images
     images = {}
     local_dir = pathlib.Path(__file__).parent.absolute()
     image_dir = os.path.join(local_dir, "images")
