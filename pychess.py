@@ -178,7 +178,6 @@ def check_legality(move):
                 else:
                     blocked = True
                     print(blocked,i)
-                    i += 8
                     return False
     return False
 
