@@ -25,9 +25,9 @@ class Board:
         # Initialises the board and calls functions to create squares, read the pieces from FEN then draw the board.
         self.squares = []
         self.initialise_squares()
-        self.read_pieces()
+        self.turn = WHITE  # default
+        self.read_fen(FEN)
         self.draw()
-        self.turn = WHITE  # TODO - set this in board.read_pieces()!
 
     def clear_pieces(self):
         pass
@@ -75,25 +75,24 @@ class Board:
                 return element
         return None
 
-    def read_pieces(self):
-        # This function reads a FEN string and places them in
-        # the pieces dict as values with its square as their key
-        # TODO - make it take in the FEN string as an argument
+    def read_fen_metadata(self, fen_string):
+        fen_string.split(" ")
+        pass
+
+    def read_fen(self, fen_string):
+        # This function reads a FEN string, creating piece objects and
         # TODO - Implement a function that creates a FEN string from the current board
         self.clear_pieces()
         col = 0
         row = 0
-        for char in FEN:
+
+        fen = fen_string.split()
+        for char in fen[0]:
             if (char == "/") or (col >= 9):
                 # Skips to the next row if the character is a slash
                 col = 0
                 row += 1
                 continue
-            if char == " ":
-                # Simply exists when there is a space - this will change
-                # TODO - Add things like whose move, castling legality and move clock in the board object as fields
-                break
-
             if char.isdigit():
                 # If the FEN string has a number, skip that many columns over
                 col += int(char)
@@ -102,13 +101,21 @@ class Board:
                 piece_type = char
                 square = self.get_square(Square(col, row))
                 col += 1
-
                 if char.isupper():
                     colour = WHITE
                 else:
                     colour = BLACK
-
                 square.piece = Piece(colour, piece_type)
+
+        if fen[1] == "w":
+            self.turn = WHITE
+        elif fen[1] == "b":
+            self.turn == BLACK
+
+        for char in fen[2]:
+            pass
+            # TODO - Set castling rights here
+        # TODO - read the rest of the FEN string
 
 
 class Piece:
@@ -299,10 +306,9 @@ class Window:
         reset_button.grid(row=1, column=0)
 
     def reset(self):
-        board.turn = WHITE
         board.squares.clear()
         board.initialise_squares()
-        board.read_pieces()
+        board.read_fen(FEN)
         board.draw()
 
 
