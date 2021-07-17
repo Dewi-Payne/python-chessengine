@@ -185,22 +185,10 @@ def check_legality(move):
 
     if move.square_from.piece.piece_type.lower() == "n":
         # Knights
-        if move.square_to == square_offset(move.square_from, 2, 1):
-            return True
-        if move.square_to == square_offset(move.square_from, 2, -1):
-            return True
-        if move.square_to == square_offset(move.square_from, -2, 1):
-            return True
-        if move.square_to == square_offset(move.square_from, -2, -1):
-            return True
-        if move.square_to == square_offset(move.square_from, 1, 2):
-            return True
-        if move.square_to == square_offset(move.square_from, 1, -2):
-            return True
-        if move.square_to == square_offset(move.square_from, -1, 2):
-            return True
-        if move.square_to == square_offset(move.square_from, -1, -2):
-            return True
+        knight_moves = ((2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (1, -2), (-1, 2), (-1, -2))
+        for m in knight_moves:
+            if move.square_to == square_offset(move.square_from, m[0], m[1]):
+                return True
 
     return False
 
