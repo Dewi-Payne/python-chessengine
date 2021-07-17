@@ -7,6 +7,7 @@ FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 move_from = None
 BLACK = -1
 WHITE = 1
+en_passant_flag = None
 
 
 class Square:
@@ -145,7 +146,7 @@ def check_legality(move):
     # If it gets here we know a piece is moving and isn't trying to capture its own piece - do more checks here
     if move.square_from.piece.piece_type.lower() == "p":
         # Pawns
-        # TODO - en passant, promotion
+        # TODO - promotion
         # Moving forward if the square is empty
         if move.square_to == square_offset(move.square_from, 0, - move.square_from.piece.colour):
             if move.square_to.piece is None:
@@ -155,12 +156,17 @@ def check_legality(move):
             if move.square_to.piece is None:
                 if move.square_from.row == 6 or move.square_from.row == 1:
                     return True
-                    # TODO - This is where a flag to let you check for en passant would go
         # Capturing
         if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
             if move.square_to == square_offset(move.square_from, 1, - move.square_from.piece.colour):
                 return True
             if move.square_to == square_offset(move.square_from, -1, - move.square_from.piece.colour):
+                return True
+        # Capturing en passant
+        if move.square_to == en_passant_flag:
+            if move.square_to == square_offset(move.square_from,-1,- move.square_from.piece.colour):
+                return True
+            if move.square_to == square_offset(move.square_from, 1, - move.square_from.piece.colour):
                 return True
 
     # Movement for sliding pieces
@@ -229,13 +235,13 @@ class Move:
         self.square_to = board.get_square(square_to)
 
     def is_legal(self):
-        if self.square_from.piece is not None:
-            if self.square_from.piece.colour == board.turn:
-                return check_legality(self)
-            else:
-                return False
-        else:
+        if self.square_from.piece is None:
             return check_legality(self)
+        elif self.square_from.piece.colour == board.turn:
+            return check_legality(self)
+        else:
+            return check_legality(self)  # This is temporary to allow a colour to move when it is not their turn
+            return False
 
     def make_move(self):
         # Takes in an object of class Move then makes the move if it is legal
@@ -245,6 +251,15 @@ class Move:
             self.square_from.piece = None
             board.draw()
             board.turn = board.turn * -1
+
+            # This flags the en passant square
+            global en_passant_flag
+            if self.square_from.row == 1 or self.square_from.row == 6:
+                if self.square_from == square_offset(self.square_to, 0, + self.square_to.piece.colour * 2):
+                    if self.square_to.piece.piece_type.lower() == "p":
+                        en_passant_flag = square_offset(self.square_to, 0, + self.square_to.piece.colour)
+            else:
+                en_passant_flag = None
 
 
 def square_clicked(event, square):
