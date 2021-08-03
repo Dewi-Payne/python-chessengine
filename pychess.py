@@ -3,7 +3,7 @@ import os
 import pathlib
 
 # Global variables
-FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+FEN = "rnbqkbnr/pPpppppp/8/8/8/8/P1PPPPPP/RNBQKBNR w KQkq - 0 1"
 move_from = None
 BLACK = -1
 WHITE = 1
@@ -76,10 +76,15 @@ class Board:
                 return element
         return None
 
+<<<<<<< Updated upstream
     def read_pieces(self):
         # This function reads a FEN string and places them in
         # the pieces dict as values with its square as their key
         # TODO - make it take in the FEN string as an argument
+=======
+    def read_fen(self, fen_string):
+        # This function reads a FEN string, creating piece objects and
+>>>>>>> Stashed changes
         # TODO - Implement a function that creates a FEN string from the current board
         self.clear_pieces()
         col = 0
@@ -139,7 +144,6 @@ def check_legality(move):
     # If it gets here we know a piece is moving and isn't trying to capture its own piece - do more checks here
     if move.square_from.piece.piece_type.lower() == "p":
         # Pawns
-        # TODO - promotion
         # Moving forward if the square is empty
         if move.square_to == square_offset(move.square_from, 0, - move.square_from.piece.colour):
             if move.square_to.piece is None:
@@ -252,6 +256,10 @@ class Move:
         # Takes in an object of class Move then makes the move if it is legal
 
         if self.is_legal():
+            if self.square_to.row == 0 or self.square_from.row == 7:
+                if self.square_from.piece.piece_type.lower() == "p":
+                    promotion_window(self)
+
             self.square_to.piece = self.square_from.piece
             self.square_from.piece = None
             board.draw()
@@ -331,6 +339,39 @@ class Window:
         board.initialise_squares()
         board.read_pieces()
         board.draw()
+
+
+def promotion_window(move):
+    w = tk.Toplevel(root)
+    w.title("Promote pawn")
+    w.geometry("264x90")
+    b1 = tk.Button(w, image=images["wN.png"], command=lambda: promote_piece(move, w, "N"))
+    b2 = tk.Button(w, image=images["wB.png"], command=lambda: promote_piece(move, w, "B"))
+    b3 = tk.Button(w, image=images["wQ.png"], command=lambda: promote_piece(move, w, "Q"))
+    b4 = tk.Button(w, image=images["wR.png"], command=lambda: promote_piece(move, w, "R"))
+    bC = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w))
+
+    b1.grid(row=0, column=0)
+    b2.grid(row=0, column=1)
+    b3.grid(row=0, column=2)
+    b4.grid(row=0, column=3)
+    bC.grid(row=1, column=0, columnspan=4)
+
+
+def cancel_promotion(move, window):
+    window.destroy()
+    temp = move.square_from.piece
+    move.square_from.piece = move.square_to.piece
+    move.square_to.piece = temp
+
+    board.turn = board.turn * -1
+    board.draw()
+
+
+def promote_piece(move, window, piece):
+    move.square_to.piece.piece_type = piece
+    board.draw()
+    window.destroy()
 
 
 if __name__ == "__main__":
