@@ -76,9 +76,6 @@ class Board:
                 return element
         return None
 
-    def read_fen_metadata(self, fen_string):
-        fen_string.split(" ")
-        pass
 
     def read_fen(self, fen_string):
         # This function reads a FEN string, creating piece objects and
