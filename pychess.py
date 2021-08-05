@@ -108,7 +108,7 @@ class Board:
         if fen[1] == "w":
             self.turn = WHITE
         elif fen[1] == "b":
-            self.turn == BLACK
+            self.turn = BLACK
 
         for char in fen[2]:
             pass
