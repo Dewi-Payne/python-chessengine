@@ -331,17 +331,12 @@ def promotion_window(move, other_piece):
     w = tk.Toplevel(root)
     w.title("Promote pawn")
     w.geometry("264x90")
-    b1 = tk.Button(w, image=images["wN.png"], command=lambda: promote_piece(move, w, "N"))
-    b2 = tk.Button(w, image=images["wB.png"], command=lambda: promote_piece(move, w, "B"))
-    b3 = tk.Button(w, image=images["wQ.png"], command=lambda: promote_piece(move, w, "Q"))
-    b4 = tk.Button(w, image=images["wR.png"], command=lambda: promote_piece(move, w, "R"))
-    bC = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece))
-
-    b1.grid(row=0, column=0)
-    b2.grid(row=0, column=1)
-    b3.grid(row=0, column=2)
-    b4.grid(row=0, column=3)
-    bC.grid(row=1, column=0, columnspan=4)
+    b1 = tk.Button(w, image=images["wN.png"], command=lambda: promote_piece(move, w, "N")).grid(row=0, column=0)
+    b2 = tk.Button(w, image=images["wB.png"], command=lambda: promote_piece(move, w, "B")).grid(row=0, column=1)
+    b3 = tk.Button(w, image=images["wQ.png"], command=lambda: promote_piece(move, w, "Q")).grid(row=0, column=2)
+    b4 = tk.Button(w, image=images["wR.png"], command=lambda: promote_piece(move, w, "R")).grid(row=0, column=3)
+    bC = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece)).grid(row=1, column=0,
+                                                                                                  columnspan=4)
 
 
 def cancel_promotion(move, w, other_piece):
