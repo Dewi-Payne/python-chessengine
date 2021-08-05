@@ -346,7 +346,7 @@ def promotion_window(move, other_piece):
 
 def cancel_promotion(move, w, other_piece):
     w.destroy()
-    move.square_to.piece, move.square_from.piece = move.square_from.piece, move.square_to.piece # Swaps pieces
+    move.square_from.piece = move.square_to.piece  # Swaps pieces
     move.square_to.piece = other_piece
 
     board.turn = board.turn * -1
