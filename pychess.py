@@ -3,7 +3,7 @@ import os
 import pathlib
 
 # Global variables
-FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+FEN = "rnbqkbnr/pPpppppp/8/8/8/8/P1PPPPPP/RNBQKBNR w KQkq - 0 1"
 move_from = None
 BLACK = -1
 WHITE = 1
@@ -143,7 +143,6 @@ def check_legality(move):
     # If it gets here we know a piece is moving and isn't trying to capture its own piece - do more checks here
     if move.square_from.piece.piece_type.lower() == "p":
         # Pawns
-        # TODO - promotion
         # Moving forward if the square is empty
         if move.square_to == square_offset(move.square_from, 0, - move.square_from.piece.colour):
             if move.square_to.piece is None:
@@ -244,6 +243,10 @@ class Move:
         # Takes in an object of class Move then makes the move if it is legal
 
         if self.is_legal():
+            if self.square_to.row == 0 or self.square_from.row == 7:
+                if self.square_from.piece.piece_type.lower() == "p":
+                    promotion_window(self, self.square_to.piece)
+
             self.square_to.piece = self.square_from.piece
             self.square_from.piece = None
             board.draw()
@@ -322,6 +325,41 @@ class Window:
         board.initialise_squares()
         board.read_fen(FEN)
         board.draw()
+
+
+def promotion_window(move, other_piece):
+    w = tk.Toplevel(root)
+    w.title("Promote pawn")
+    w.geometry("264x90")
+    b1 = tk.Button(w, image=images["wN.png"], command=lambda: promote_piece(move, w, "N"))
+    b2 = tk.Button(w, image=images["wB.png"], command=lambda: promote_piece(move, w, "B"))
+    b3 = tk.Button(w, image=images["wQ.png"], command=lambda: promote_piece(move, w, "Q"))
+    b4 = tk.Button(w, image=images["wR.png"], command=lambda: promote_piece(move, w, "R"))
+    bC = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece))
+
+    b1.grid(row=0, column=0)
+    b2.grid(row=0, column=1)
+    b3.grid(row=0, column=2)
+    b4.grid(row=0, column=3)
+    bC.grid(row=1, column=0, columnspan=4)
+
+
+def cancel_promotion(move, w, other_piece):
+    w.destroy()
+    move.square_to.piece, move.square_from.piece = move.square_from.piece, move.square_to.piece # Swaps pieces
+    move.square_to.piece = other_piece
+
+    board.turn = board.turn * -1
+    board.draw()
+    a = 1
+    b = 2
+    a, b = b, a
+
+
+def promote_piece(move, w, piece):
+    move.square_to.piece.piece_type = piece
+    board.draw()
+    w.destroy()
 
 
 if __name__ == "__main__":
