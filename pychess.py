@@ -236,7 +236,6 @@ class Move:
         elif self.square_from.piece.colour == board.turn:
             return check_legality(self)
         else:
-            return check_legality(self)  # This is temporary to allow a colour to move when it is not their turn
             return False
 
     def make_move(self):
