@@ -10,9 +10,33 @@ WHITE = 1
 en_passant_flag = None
 
 
+class Piece:
+    """
+    Object for pieces.
+
+    Attributes:
+        colour (int): The colour of the piece, WHITE = 1, BLACK = -1
+        piece_type (str): The piece type character. Uppercase represents white, lowercase black.
+    """
+    def __init__(self, colour: int = None, piece_type: str = None):
+        self.colour = colour
+        self.piece_type = piece_type
+
+
 class Square:
-    # class that represents a square
-    def __init__(self, col, row, canvas=None, piece=None, colour=None):
+    """
+    An object that represents a square.
+
+    Attributes:
+        col (int): Integer value for the column.
+        row (int): Integer value for the row.
+        canvas (tk.Canvas): Canvas object for this square, used for changing its appearance (default: None).
+        piece (Piece): The piece that occupies this square (default: None).
+        colour (str):
+            String for the square's color, using tkinter internal colour names (default: None).
+            http://www.science.smith.edu/dftwiki/index.php/Color_Charts_for_TKinter
+    """
+    def __init__(self, col: int, row: int, canvas: tk.Canvas = None, piece: Piece() = None, colour=None):
         self.col = col
         self.row = row
         self.canvas = canvas
@@ -21,31 +45,40 @@ class Square:
 
 
 class Board:
-    # class that represents the board
-    def __init__(self):
-        # Initialises the board and calls functions to create squares, read the pieces from FEN then draw the board.
-        self.squares = []
-        self.initialise_squares()
-        self.turn = WHITE  # default
-        self.read_fen(FEN)
-        self.draw()
+    """
+    Board class.
 
-    def clear_pieces(self):
-        pass
-        # This caused problems elsewhere so i commented it out, it's being called where it shouldn't
-        # for element in self.squares:
-        #    element.piece = None
+    Attributes:
+        squares (list): The list of all 64 squares on the board. Created in Board.initialise_squares().
+        turn (int): Which colour's turn it is; WHITE = 1, BLACK = -1 (default: 1).
+    """
+    def __init__(self):
+        """ Initialises the Board class. """
+        self.squares = []
+        self.turn = WHITE
+
+        self.draw()
+        self.initialise_squares()
+        self.read_fen(FEN)
 
     def initialise_squares(self):
-        # All this method does is creates all the squares for the board
-        # It needs to be called before board.draw() or board.read_pieces are called
+        """ A method for creating the squares of the board. """
         for row in range(8):
             for col in range(8):
                 self.squares.append(Square(col, row))
 
     def draw(self):
-        # method for drawing the board based on the
-        # position of pieces in the board.squares list
+        """
+        A method that draws the board.
+
+        It uses the Board.squares list and draws each of them, iterating through rows and columns and
+        fetching each square. It then assigns the colour of the square, creates and assigns a canvas,
+        binds the functions on clicking to the canvases, and then draws the piece.
+
+        Todo:
+            Creating a new canvas and re-assigning the colours every time the board updates seems
+            inefficient, perhaps seperate some functionality into Board.initialise_squares()?
+        """
         for row in range(8):
             for col in range(8):
                 # Fetches the correct square object to assign its canvas and to read its piece information for drawing
@@ -55,7 +88,6 @@ class Board:
                 square.colour = "linen" if (col + row) % 2 == 0 else "PaleVioletRed3"
 
                 # Creates canvas to represent each square of the correct colour
-                # TODO - Research if drag and drop is possible with this setup
                 square.canvas = tk.Canvas(window.board_frame, width=50, height=50, bg=square.colour, bd=0,
                                           highlightthickness=0, relief='ridge')
 
@@ -71,16 +103,35 @@ class Board:
                 square.canvas.grid(row=row, column=col)
 
     def get_square(self, square):
+        """
+        Returns a specific Square object belonging to Board.squares
+        when given a square of the same coordinates.
+
+        Args:
+            square (Square): A square whose row and col attributes are read to find the square of the same coordinates.
+
+        Returns:
+            element (Square): The board's Square object, if it exists.
+            None: if a square with the same coordinates as the argument square doesn't exist.
+        """
         for element in self.squares:
             if element.col == square.col and element.row == square.row:
                 return element
         return None
 
-
     def read_fen(self, fen_string):
-        # This function reads a FEN string, creating piece objects and
-        # TODO - Implement a function that creates a FEN string from the current board
-        self.clear_pieces()
+        """
+        Reads a string in FEN format, and assigns relevant variables based off of what it reads.
+        https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+
+        Args:
+            fen_string (str): A string that should be in FEN format with information on the board's status.
+
+        Todo:
+            Some function that reads the board's status and creates a FEN string.
+            Castling rights.
+            Remaining values at the bottom of this function.
+        """
         col = 0
         row = 0
 
@@ -112,18 +163,20 @@ class Board:
 
         for char in fen[2]:
             pass
-            # TODO - Set castling rights here
-        # TODO - read the rest of the FEN string
 
 
-class Piece:
-    # class to store a piece with its colour and type
-    def __init__(self, colour=None, piece_type=None):
-        self.colour = colour
-        self.piece_type = piece_type
+def square_offset(square: Square, col: int, row: int):
+    """
+    A function that returns a square offset by a specified row and column values.
 
+    Args:
+        square (Square): The original square to fetch another square offset by the col and row variables given.
+        col (int): Number of columns to offset.
+        row (int): Number of rows to offset.
 
-def square_offset(square, col, row):
+    Returns:
+        Square: The offset square from the original.
+    """
     return board.get_square(Square(square.col + col, square.row + row))
 
 
@@ -204,7 +257,6 @@ def check_legality(move):
 
 def sliding_move(square, col_offset, row_offset, original_square=None):
     # Returns a list of squares a piece can move to in a given direction
-    # TODO - capturing pieces and probably other rules need to be implemented
 
     # This is meant to be for capturing
     if original_square is None:
@@ -225,7 +277,6 @@ def sliding_move(square, col_offset, row_offset, original_square=None):
 
 class Move:
     # Class that represents a move between two given squares, legality is calculated on creation
-    # TODO - Move most of this to a function to leave the class move as a basic data structure that just stores squares
     def __init__(self, square_from, square_to):
         self.square_from = board.get_square(square_from)
         self.square_to = board.get_square(square_to)
@@ -291,7 +342,7 @@ def square_clicked(event, square):
 def clear_move():
     # This is triggered by right clicking on the board and just
     # resets the stored global move variable and re-draws the squares to reset the colour
-    # TODO - maybe it could be one of board's variables instead of global?
+    # TODO - maybe this (move_from) could be one of board's variables instead of global?
     global move_from
     move_from = None
 
