@@ -1,4 +1,4 @@
-"""A simple Python chess engine."""
+"""A simple chess engine using Python."""
 
 import tkinter as tk
 import os
@@ -20,6 +20,7 @@ class Piece:
         colour (int): The colour of the piece, WHITE = 1, BLACK = -1
         piece_type (str): The piece type character. Uppercase represents white, lowercase black.
     """
+
     def __init__(self, colour: int = None, piece_type: str = None):
         self.colour = colour
         self.piece_type = piece_type
@@ -38,7 +39,8 @@ class Square:
             String for the square's color, using tkinter internal colour names (default: None).
             http://www.science.smith.edu/dftwiki/index.php/Color_Charts_for_TKinter
     """
-    def __init__(self, col: int, row: int, canvas: tk.Canvas = None, piece: Piece() = None, colour=None):
+
+    def __init__(self, col: int, row: int, canvas: tk.Canvas = None, piece: Piece = None, colour=None):
         self.col = col
         self.row = row
         self.canvas = canvas
@@ -61,7 +63,8 @@ class Move:
         self.square_to = board.get_square(square_to)
 
     def is_legal(self):
-        """Method to check if a Move object is legal using the check_legality function."""
+        """Method to check if a Move object is legal, using the check_legality function and checking
+         what player's turn it is."""
         if self.square_from.piece is None:
             return check_legality(self)
         elif self.square_from.piece.colour == board.turn:
@@ -71,8 +74,6 @@ class Move:
 
     def make_move(self):
         """Method for executing a move with a given Move object on the board, given a legal Move."""
-        # Takes in an object of class Move then makes the move if it is legal
-
         if self.is_legal():
             if self.square_to.row == 0 or self.square_from.row == 7:
                 if self.square_from.piece.piece_type.lower() == "p":
@@ -107,9 +108,9 @@ class Board:
         self.squares = []
         self.turn = WHITE
 
-        self.draw()
         self.initialise_squares()
         self.read_fen(FEN)
+        self.draw()
 
     def initialise_squares(self):
         """ A method for creating the squares of the board. """
@@ -152,7 +153,7 @@ class Board:
                     square.canvas.create_image(24, 25, image=images[piece])
                 square.canvas.grid(row=row, column=col)
 
-    def get_square(self, square):
+    def get_square(self, square: Square):
         """
         Returns a specific Square object belonging to Board.squares
         when given a square of the same coordinates.
@@ -169,7 +170,7 @@ class Board:
                 return element
         return None
 
-    def read_fen(self, fen_string):
+    def read_fen(self, fen_string: str):
         """
         Reads a string in FEN format, and assigns relevant variables based off of what it reads.
         https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -220,7 +221,7 @@ def square_offset(square: Square, col: int, row: int):
     return board.get_square(Square(square.col + col, square.row + row))
 
 
-def check_legality(move):
+def check_legality(move: Move):
     """
     A function that takes in a Move object and returns if it is legal.
 
@@ -270,7 +271,7 @@ def check_legality(move):
                 return True
 
     # Movement for sliding pieces
-    # the list here stores the offsets for all 8 directions which sliding pieces can move in
+    # the list here stores the offsets for all 8 directions which sliding pieces can move.
     sliding_directions = [(1, 1), (-1, 1), (1, -1), (-1, -1), (0, 1), (0, -1), (1, 0), (-1, 0)]
     if move.square_from.piece.piece_type.lower() == "r":
         # Rooks
@@ -306,7 +307,7 @@ def check_legality(move):
     return False
 
 
-def sliding_move(square, col_offset, row_offset, original_square=None):
+def sliding_move(square: Square, col_offset: int, row_offset: int, original_square: Square = None):
     """
     A function to calculate a list of squares a sliding piece can move to in a line with a given offset direction,
     for both straight and diagonal moving pieces.
@@ -315,9 +316,13 @@ def sliding_move(square, col_offset, row_offset, original_square=None):
         square (Square): The original square to check from.
         col_offset (int): Integer value for the column offset.
         row_offset (int): Integer value for the row offset.
-        original_square (Square): A temporary value that is.
+        original_square (Square):
+            A temporary variable that is used to store the original square, to
+            see see if a piece on a square we check can be captured (default: None).
+
+    Todo:
+        * This doesn't need to be recursive and may be more readable and faster if refactored.
     """
-    # Returns a list of squares a piece can move to in a given direction
 
     # This is meant to be for capturing
     if original_square is None:
@@ -336,18 +341,29 @@ def sliding_move(square, col_offset, row_offset, original_square=None):
         return [temp_square] + sliding_move(temp_square, col_offset, row_offset, original_square)
 
 
-def square_clicked(event, square):
-    # This function is triggered every time you click on a canvas and
-    # depending on if you have already started a move or not decides to
-    # colour the square and set the move_from to that square or tries to execute a move
-    # from the stored square to the current one passed as an argument here named "square"
+def square_clicked(event: tk.Event, square: Square):
+    """
+    A function which allows a player to make moves by clicking pieces on the board.
+
+    It checks to see if a piece has already been clicked; if not, it will store the Square
+    in the global move_from variable, highlight the square to visually differentiate it,
+    and highlights possble moves from that square. If a Square has already been stored
+    before this function is triggered again, it will make the move and redraw the board.
+
+    Args:
+        event (tk.Event): The Tkinter event. Not currently used.
+        square (Square): The Square object that has been clicked.
+
+    Todo:
+        * Generate all legal moves elsewhere and fetch them instead of iterating through every square
+            when highlighting legal moves.
+    """
     square = board.get_square(square)
     global move_from
     if move_from is None:
         square.canvas.config(bg="red")
         move_from = square
 
-        # There's probably a neater way to do this - this is pretty makeshift but it seems to work
         for squ in board.squares:
             if move_from is not squ:
                 if Move(move_from, squ).is_legal():
@@ -364,9 +380,11 @@ def square_clicked(event, square):
 
 
 def clear_move():
-    # This is triggered by right clicking on the board and just
-    # resets the stored global move variable and re-draws the squares to reset the colour
-    # TODO - maybe this (move_from) could be one of board's variables instead of global?
+    """Function to clear the global make_move variable, used in square_clicked().
+
+    Todo:
+        * move_from could be one of board's variables instead of global?
+    """
     global move_from
     move_from = None
 
@@ -374,6 +392,7 @@ def clear_move():
 
 
 class Window:
+    """A static class used for drawing the UI."""
     def __init__(self):
         main_frame = tk.Frame(root, width=1200, height=600, bg="white")
         main_frame.grid(row=0, column=0)
@@ -395,13 +414,20 @@ class Window:
         reset_button.grid(row=1, column=0)
 
     def reset(self):
+        """Resets the board to its original state."""
         board.squares.clear()
         board.initialise_squares()
         board.read_fen(FEN)
         board.draw()
 
 
-def promotion_window(move, other_piece):
+def promotion_window(move: Move, other_piece: Piece):
+    """
+    Function that displays pawn promotion options.
+
+    Todo:
+        * Expand for both colours (currently, black pawns can't promote).
+    """
     w = tk.Toplevel(root)
     w.title("Promote pawn")
     w.geometry("264x90")
@@ -414,6 +440,7 @@ def promotion_window(move, other_piece):
 
 
 def cancel_promotion(move, w, other_piece):
+    """Undoes piece promotion and closes the promotion window."""
     w.destroy()
     move.square_from.piece = move.square_to.piece  # Swaps pieces
     move.square_to.piece = other_piece
@@ -425,7 +452,8 @@ def cancel_promotion(move, w, other_piece):
     a, b = b, a
 
 
-def promote_piece(move, w, piece):
+def promote_piece(move: Move, w: tk.Toplevel, piece: str):
+    """Promotes a pawn to a piece given by the piece string."""
     move.square_to.piece.piece_type = piece
     board.draw()
     w.destroy()
