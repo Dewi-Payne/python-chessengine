@@ -1,3 +1,5 @@
+"""A simple Python chess engine."""
+
 import tkinter as tk
 import os
 import pathlib
@@ -44,6 +46,53 @@ class Square:
         self.colour = colour
 
 
+class Move:
+    """
+    A class that represents a move between two Square objects.
+
+    Attributes:
+        square_from (Square): A Square which the Move originates from.
+        square_to (Square): A Square which is the destination of the Move.
+    """
+
+    def __init__(self, square_from, square_to):
+        """Initialises Move class."""
+        self.square_from = board.get_square(square_from)
+        self.square_to = board.get_square(square_to)
+
+    def is_legal(self):
+        """Method to check if a Move object is legal using the check_legality function."""
+        if self.square_from.piece is None:
+            return check_legality(self)
+        elif self.square_from.piece.colour == board.turn:
+            return check_legality(self)
+        else:
+            return False
+
+    def make_move(self):
+        """Method for executing a move with a given Move object on the board, given a legal Move."""
+        # Takes in an object of class Move then makes the move if it is legal
+
+        if self.is_legal():
+            if self.square_to.row == 0 or self.square_from.row == 7:
+                if self.square_from.piece.piece_type.lower() == "p":
+                    promotion_window(self, self.square_to.piece)
+
+            self.square_to.piece = self.square_from.piece
+            self.square_from.piece = None
+            board.draw()
+            board.turn = board.turn * -1
+
+            # This flags the en passant square
+            global en_passant_flag
+            if self.square_from.row == 1 or self.square_from.row == 6:
+                if self.square_from == square_offset(self.square_to, 0, + self.square_to.piece.colour * 2):
+                    if self.square_to.piece.piece_type.lower() == "p":
+                        en_passant_flag = square_offset(self.square_to, 0, + self.square_to.piece.colour)
+            else:
+                en_passant_flag = None
+
+
 class Board:
     """
     Board class.
@@ -52,6 +101,7 @@ class Board:
         squares (list): The list of all 64 squares on the board. Created in Board.initialise_squares().
         turn (int): Which colour's turn it is; WHITE = 1, BLACK = -1 (default: 1).
     """
+
     def __init__(self):
         """ Initialises the Board class. """
         self.squares = []
@@ -76,8 +126,8 @@ class Board:
         binds the functions on clicking to the canvases, and then draws the piece.
 
         Todo:
-            Creating a new canvas and re-assigning the colours every time the board updates seems
-            inefficient, perhaps seperate some functionality into Board.initialise_squares()?
+            * Creating a new canvas and re-assigning the colours every time the board updates seems
+            * inefficient, perhaps separate some functionality into Board.initialise_squares()?
         """
         for row in range(8):
             for col in range(8):
@@ -128,9 +178,9 @@ class Board:
             fen_string (str): A string that should be in FEN format with information on the board's status.
 
         Todo:
-            Some function that reads the board's status and creates a FEN string.
-            Castling rights.
-            Remaining values at the bottom of this function.
+            * Some function that reads the board's status and creates a FEN string.
+            * Castling rights.
+            * Remaining values at the bottom of this function.
         """
         col = 0
         row = 0
@@ -166,24 +216,25 @@ class Board:
 
 
 def square_offset(square: Square, col: int, row: int):
-    """
-    A function that returns a square offset by a specified row and column values.
-
-    Args:
-        square (Square): The original square to fetch another square offset by the col and row variables given.
-        col (int): Number of columns to offset.
-        row (int): Number of rows to offset.
-
-    Returns:
-        Square: The offset square from the original.
-    """
+    """A function that returns a square offset by a specified row and column values."""
     return board.get_square(Square(square.col + col, square.row + row))
 
 
 def check_legality(move):
-    # Function for checking move legality; only makes sure the square from isn't blank
-    # or if the pieces are of the same colour (so far).
-    # returns True if move is legal, False otherwise
+    """
+    A function that takes in a Move object and returns if it is legal.
+
+    Args:
+        move (Move): A Move object between two squares which is checked to see if it is a valid move.
+
+    Attributes:
+        move.square_from (Square):
+        move.square_to (Square):
+            A Square for a Move.
+
+    Returns:
+        (Bool): True if the move is legal, False otherwise.
+    """
 
     if move.square_from.piece is None:
         # If you're trying to move an empty square, it fails
@@ -256,6 +307,16 @@ def check_legality(move):
 
 
 def sliding_move(square, col_offset, row_offset, original_square=None):
+    """
+    A function to calculate a list of squares a sliding piece can move to in a line with a given offset direction,
+    for both straight and diagonal moving pieces.
+
+    Args:
+        square (Square): The original square to check from.
+        col_offset (int): Integer value for the column offset.
+        row_offset (int): Integer value for the row offset.
+        original_square (Square): A temporary value that is.
+    """
     # Returns a list of squares a piece can move to in a given direction
 
     # This is meant to be for capturing
@@ -273,43 +334,6 @@ def sliding_move(square, col_offset, row_offset, original_square=None):
 
     else:
         return [temp_square] + sliding_move(temp_square, col_offset, row_offset, original_square)
-
-
-class Move:
-    # Class that represents a move between two given squares, legality is calculated on creation
-    def __init__(self, square_from, square_to):
-        self.square_from = board.get_square(square_from)
-        self.square_to = board.get_square(square_to)
-
-    def is_legal(self):
-        if self.square_from.piece is None:
-            return check_legality(self)
-        elif self.square_from.piece.colour == board.turn:
-            return check_legality(self)
-        else:
-            return False
-
-    def make_move(self):
-        # Takes in an object of class Move then makes the move if it is legal
-
-        if self.is_legal():
-            if self.square_to.row == 0 or self.square_from.row == 7:
-                if self.square_from.piece.piece_type.lower() == "p":
-                    promotion_window(self, self.square_to.piece)
-
-            self.square_to.piece = self.square_from.piece
-            self.square_from.piece = None
-            board.draw()
-            board.turn = board.turn * -1
-
-            # This flags the en passant square
-            global en_passant_flag
-            if self.square_from.row == 1 or self.square_from.row == 6:
-                if self.square_from == square_offset(self.square_to, 0, + self.square_to.piece.colour * 2):
-                    if self.square_to.piece.piece_type.lower() == "p":
-                        en_passant_flag = square_offset(self.square_to, 0, + self.square_to.piece.colour)
-            else:
-                en_passant_flag = None
 
 
 def square_clicked(event, square):
