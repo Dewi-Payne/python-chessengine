@@ -5,7 +5,7 @@ import os
 import pathlib
 
 # Global variables
-FEN = "rnbqkbnr/pPpppppp/8/8/8/8/P1PPPPPP/RNBQKBNR w KQkq - 0 1"
+FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 move_from = None
 BLACK = -1
 WHITE = 1
@@ -46,7 +46,7 @@ class Square:
         self.canvas = canvas
         self.piece = piece
         self.colour = colour
-
+        self.EP = False
 
 class Move:
     """
@@ -75,7 +75,7 @@ class Move:
     def make_move(self):
         """Method for executing a move with a given Move object on the board, given a legal Move."""
         if self.is_legal():
-            if self.square_to.row == 0 or self.square_from.row == 7:
+            if self.square_to.row == 0 or self.square_to.row == 7:
                 if self.square_from.piece.piece_type.lower() == "p":
                     promotion_window(self, self.square_to.piece)
 
@@ -219,6 +219,8 @@ class Board:
 def square_offset(square: Square, col: int, row: int):
     """A function that returns a square offset by a specified row and column values."""
     return board.get_square(Square(square.col + col, square.row + row))
+def en_passant(square_from):
+    print(square_from)
 
 
 def check_legality(move: Move):
@@ -256,6 +258,7 @@ def check_legality(move: Move):
         if move.square_to == square_offset(move.square_from, 0, - move.square_from.piece.colour * 2):
             if move.square_to.piece is None:
                 if move.square_from.row == 6 or move.square_from.row == 1:
+                    en_passant(move.square_from)
                     return True
         # Capturing
         if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
@@ -428,15 +431,29 @@ def promotion_window(move: Move, other_piece: Piece):
     Todo:
         * Expand for both colours (currently, black pawns can't promote).
     """
-    w = tk.Toplevel(root)
-    w.title("Promote pawn")
-    w.geometry("264x90")
-    b1 = tk.Button(w, image=images["wN.png"], command=lambda: promote_piece(move, w, "N")).grid(row=0, column=0)
-    b2 = tk.Button(w, image=images["wB.png"], command=lambda: promote_piece(move, w, "B")).grid(row=0, column=1)
-    b3 = tk.Button(w, image=images["wQ.png"], command=lambda: promote_piece(move, w, "Q")).grid(row=0, column=2)
-    b4 = tk.Button(w, image=images["wR.png"], command=lambda: promote_piece(move, w, "R")).grid(row=0, column=3)
-    bC = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece)).grid(row=1, column=0,
-                                                                                                  columnspan=4)
+    if move.square_to.row == 7:
+        wb = tk.Toplevel(root)
+        wb.title("Promote pawn")
+        wb.geometry("264x90")
+        b1 = tk.Button(wb, image=images["bn.png"], command=lambda: promote_piece(move, wb, "n")).grid(row=0, column=0)
+        b2 = tk.Button(wb, image=images["bb.png"], command=lambda: promote_piece(move, wb, "b")).grid(row=0, column=1)
+        b3 = tk.Button(wb, image=images["bq.png"], command=lambda: promote_piece(move, wb, "q")).grid(row=0, column=2)
+        b4 = tk.Button(wb, image=images["br.png"], command=lambda: promote_piece(move, wb, "r")).grid(row=0, column=3)
+        bC = tk.Button(wb, text="cancel", command=lambda: cancel_promotion(move, wb, other_piece)).grid(row=1, column=0,
+                                                                                                      columnspan=4)
+
+
+    if move.square_to.row == 0:
+        w = tk.Toplevel(root)
+        w.title("Promote pawn")
+        w.geometry("264x90")
+        b1 = tk.Button(w, image=images["wN.png"], command=lambda: promote_piece(move, w, "N")).grid(row=0, column=0)
+        b2 = tk.Button(w, image=images["wB.png"], command=lambda: promote_piece(move, w, "B")).grid(row=0, column=1)
+        b3 = tk.Button(w, image=images["wQ.png"], command=lambda: promote_piece(move, w, "Q")).grid(row=0, column=2)
+        b4 = tk.Button(w, image=images["wR.png"], command=lambda: promote_piece(move, w, "R")).grid(row=0, column=3)
+        bC = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece)).grid(row=1, column=0,
+                                                                                                      columnspan=4)
+
 
 
 def cancel_promotion(move, w, other_piece):
