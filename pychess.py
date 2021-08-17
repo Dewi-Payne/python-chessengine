@@ -59,8 +59,8 @@ class Move:
 
     def __init__(self, square_from, square_to):
         """Initialises Move class."""
-        self.square_from = board.get_square(square_from)
-        self.square_to = board.get_square(square_to)
+        self.square_from = board.get_square(square_from.col, square_from.row)
+        self.square_to = board.get_square(square_to.col, square_to.row)
 
     def is_legal(self):
         """Method to check if a Move object is legal, using the check_legality function and checking
@@ -133,7 +133,7 @@ class Board:
         for row in range(8):
             for col in range(8):
                 # Fetches the correct square object to assign its canvas and to read its piece information for drawing
-                square = self.get_square(Square(col, row))
+                square = self.get_square(col, row)
 
                 # Determines the colour of each square
                 square.colour = "linen" if (col + row) % 2 == 0 else "PaleVioletRed3"
@@ -153,20 +153,21 @@ class Board:
                     square.canvas.create_image(24, 25, image=images[piece])
                 square.canvas.grid(row=row, column=col)
 
-    def get_square(self, square: Square):
+    def get_square(self, col: int, row: int):
         """
         Returns a specific Square object belonging to Board.squares
-        when given a square of the same coordinates.
+        when given coordinates.
 
         Args:
-            square (Square): A square whose row and col attributes are read to find the square of the same coordinates.
+            col (int): The column of the desired square.
+            row (int): The row of the desired square.
 
         Returns:
             element (Square): The board's Square object, if it exists.
             None: if a square with the same coordinates as the argument square doesn't exist.
         """
         for element in self.squares:
-            if element.col == square.col and element.row == square.row:
+            if element.col == col and element.row == row:
                 return element
         return None
 
@@ -199,7 +200,7 @@ class Board:
             else:
                 # This part creates the piece object and assigns it to the correct square
                 piece_type = char
-                square = self.get_square(Square(col, row))
+                square = self.get_square(col, row)
                 col += 1
                 if char.isupper():
                     colour = WHITE
@@ -218,7 +219,9 @@ class Board:
 
 def square_offset(square: Square, col: int, row: int):
     """A function that returns a square offset by a specified row and column values."""
-    return board.get_square(Square(square.col + col, square.row + row))
+    return board.get_square(square.col + col, square.row + row)
+
+
 def en_passant(square_from):
     print(square_from)
 
@@ -361,7 +364,7 @@ def square_clicked(event: tk.Event, square: Square):
         * Generate all legal moves elsewhere and fetch them instead of iterating through every square
             when highlighting legal moves.
     """
-    square = board.get_square(square)
+    square = board.get_square(square.col, square.row)
     global move_from
     if move_from is None:
         square.canvas.config(bg="red")
@@ -453,7 +456,6 @@ def promotion_window(move: Move, other_piece: Piece):
         b4 = tk.Button(w, image=images["wR.png"], command=lambda: promote_piece(move, w, "R")).grid(row=0, column=3)
         bC = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece)).grid(row=1, column=0,
                                                                                                       columnspan=4)
-
 
 
 def cancel_promotion(move, w, other_piece):
