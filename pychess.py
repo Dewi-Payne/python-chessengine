@@ -48,6 +48,7 @@ class Square:
         self.colour = colour
         self.EP = False
 
+
 class Move:
     """
     A class that represents a move between two Square objects.
@@ -271,7 +272,7 @@ def check_legality(move: Move):
                 return True
         # Capturing en passant
         if move.square_to == en_passant_flag:
-            if move.square_to == square_offset(move.square_from,-1,- move.square_from.piece.colour):
+            if move.square_to == square_offset(move.square_from, -1, - move.square_from.piece.colour):
                 return True
             if move.square_to == square_offset(move.square_from, 1, - move.square_from.piece.colour):
                 return True
@@ -353,7 +354,7 @@ def square_clicked(event: tk.Event, square: Square):
 
     It checks to see if a piece has already been clicked; if not, it will store the Square
     in the global move_from variable, highlight the square to visually differentiate it,
-    and highlights possble moves from that square. If a Square has already been stored
+    and highlights possible moves from that square. If a Square has already been stored
     before this function is triggered again, it will make the move and redraw the board.
 
     Args:
@@ -438,24 +439,31 @@ def promotion_window(move: Move, other_piece: Piece):
         wb = tk.Toplevel(root)
         wb.title("Promote pawn")
         wb.geometry("264x90")
-        b1 = tk.Button(wb, image=images["bn.png"], command=lambda: promote_piece(move, wb, "n")).grid(row=0, column=0)
-        b2 = tk.Button(wb, image=images["bb.png"], command=lambda: promote_piece(move, wb, "b")).grid(row=0, column=1)
-        b3 = tk.Button(wb, image=images["bq.png"], command=lambda: promote_piece(move, wb, "q")).grid(row=0, column=2)
-        b4 = tk.Button(wb, image=images["br.png"], command=lambda: promote_piece(move, wb, "r")).grid(row=0, column=3)
-        bC = tk.Button(wb, text="cancel", command=lambda: cancel_promotion(move, wb, other_piece)).grid(row=1, column=0,
-                                                                                                      columnspan=4)
-
+        b1 = tk.Button(wb, image=images["bn.png"], command=lambda: promote_piece(move, wb, "n"))
+        b2 = tk.Button(wb, image=images["bb.png"], command=lambda: promote_piece(move, wb, "b"))
+        b3 = tk.Button(wb, image=images["bq.png"], command=lambda: promote_piece(move, wb, "q"))
+        b4 = tk.Button(wb, image=images["br.png"], command=lambda: promote_piece(move, wb, "r"))
+        bc = tk.Button(wb, text="cancel", command=lambda: cancel_promotion(move, wb, other_piece))
+        b1.grid(row=0, column=0)
+        b2.grid(row=0, column=1)
+        b3.grid(row=0, column=2)
+        b4.grid(row=0, column=3)
+        bc.grid(row=1, column=0, columnspan=4)
 
     if move.square_to.row == 0:
         w = tk.Toplevel(root)
         w.title("Promote pawn")
         w.geometry("264x90")
-        b1 = tk.Button(w, image=images["wN.png"], command=lambda: promote_piece(move, w, "N")).grid(row=0, column=0)
-        b2 = tk.Button(w, image=images["wB.png"], command=lambda: promote_piece(move, w, "B")).grid(row=0, column=1)
-        b3 = tk.Button(w, image=images["wQ.png"], command=lambda: promote_piece(move, w, "Q")).grid(row=0, column=2)
-        b4 = tk.Button(w, image=images["wR.png"], command=lambda: promote_piece(move, w, "R")).grid(row=0, column=3)
-        bC = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece)).grid(row=1, column=0,
-                                                                                                      columnspan=4)
+        b1 = tk.Button(w, image=images["wN.png"], command=lambda: promote_piece(move, w, "N"))
+        b2 = tk.Button(w, image=images["wB.png"], command=lambda: promote_piece(move, w, "B"))
+        b3 = tk.Button(w, image=images["wQ.png"], command=lambda: promote_piece(move, w, "Q"))
+        b4 = tk.Button(w, image=images["wR.png"], command=lambda: promote_piece(move, w, "R"))
+        bc = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece))
+        b1.grid(row=0, column=0)
+        b2.grid(row=0, column=1)
+        b3.grid(row=0, column=2)
+        b4.grid(row=0, column=3)
+        bc.grid(row=1, column=0, columnspan=4)
 
 
 def cancel_promotion(move, w, other_piece):
@@ -466,9 +474,6 @@ def cancel_promotion(move, w, other_piece):
 
     board.turn = board.turn * -1
     board.draw()
-    a = 1
-    b = 2
-    a, b = b, a
 
 
 def promote_piece(move: Move, w: tk.Toplevel, piece: str):
