@@ -5,7 +5,7 @@ import os
 import pathlib
 
 # Global variables
-FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+FEN = "rnbqkbnr/pPpppppp/8/8/8/8/PpPPPPPP/RNBQKBNR w KQkq - 0 1"
 move_from = None
 BLACK = -1
 WHITE = 1
@@ -429,41 +429,28 @@ class Window:
 
 
 def promotion_window(move: Move, other_piece: Piece):
-    """
-    Function that displays pawn promotion options.
+    """ Function that displays pawn promotion options. """
 
-    Todo:
-        * Expand for both colours (currently, black pawns can't promote).
-    """
-    if move.square_to.row == 7:
-        wb = tk.Toplevel(root)
-        wb.title("Promote pawn")
-        wb.geometry("264x90")
-        b1 = tk.Button(wb, image=images["bn.png"], command=lambda: promote_piece(move, wb, "n"))
-        b2 = tk.Button(wb, image=images["bb.png"], command=lambda: promote_piece(move, wb, "b"))
-        b3 = tk.Button(wb, image=images["bq.png"], command=lambda: promote_piece(move, wb, "q"))
-        b4 = tk.Button(wb, image=images["br.png"], command=lambda: promote_piece(move, wb, "r"))
-        bc = tk.Button(wb, text="cancel", command=lambda: cancel_promotion(move, wb, other_piece))
-        b1.grid(row=0, column=0)
-        b2.grid(row=0, column=1)
-        b3.grid(row=0, column=2)
-        b4.grid(row=0, column=3)
-        bc.grid(row=1, column=0, columnspan=4)
+    # Defines a list of pieces to promote to, for which ever colour is promoting.
+    pieces = ["wN", "wB", "wR", "wQ"] if move.square_from.piece.colour == WHITE else ["bn", "bb", "bq", "br"]
 
-    if move.square_to.row == 0:
-        w = tk.Toplevel(root)
-        w.title("Promote pawn")
-        w.geometry("264x90")
-        b1 = tk.Button(w, image=images["wN.png"], command=lambda: promote_piece(move, w, "N"))
-        b2 = tk.Button(w, image=images["wB.png"], command=lambda: promote_piece(move, w, "B"))
-        b3 = tk.Button(w, image=images["wQ.png"], command=lambda: promote_piece(move, w, "Q"))
-        b4 = tk.Button(w, image=images["wR.png"], command=lambda: promote_piece(move, w, "R"))
-        bc = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece))
-        b1.grid(row=0, column=0)
-        b2.grid(row=0, column=1)
-        b3.grid(row=0, column=2)
-        b4.grid(row=0, column=3)
-        bc.grid(row=1, column=0, columnspan=4)
+    # Creating and setting aspects of the promotion window.
+    w = tk.Toplevel(root)
+    w.title("Promote pawn")
+    w.geometry("264x90")
+
+    """
+    Here, it loops over the pieces in the pieces list. It creates a button with the correct image, and
+    assigns the correct values within the command it triggers on being pressed.
+    Credit to StackOverflow user BretBarn for the explanation on how to do this in a loop:
+    https://stackoverflow.com/questions/10865116/tkinter-creating-buttons-in-for-loop-passing-command-arguments
+    """
+    for i, piece in enumerate(pieces):
+        temp_name = "temp" + piece
+        temp_name = tk.Button(w, image=images[piece+".png"], command=lambda piece=piece: promote_piece(move, w, piece[1]))
+        temp_name.grid(row=0, column=i)
+    t = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece))
+    t.grid(row=1, column=0, columnspan=4)
 
 
 def cancel_promotion(move, w, other_piece):
