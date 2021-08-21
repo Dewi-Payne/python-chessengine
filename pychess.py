@@ -447,7 +447,7 @@ def promotion_window(move: Move, other_piece: Piece):
     """
     for i, piece in enumerate(pieces):
         temp_name = "temp" + piece
-        temp_name = tk.Button(w, image=images[piece+".png"], command=lambda piece=piece: promote_piece(move, w, piece[1]))
+        temp_name = tk.Button(w, image=images[piece+".png"], command=lambda x=piece: promote_piece(move, w, x[1]))
         temp_name.grid(row=0, column=i)
     t = tk.Button(w, text="cancel", command=lambda: cancel_promotion(move, w, other_piece))
     t.grid(row=1, column=0, columnspan=4)
