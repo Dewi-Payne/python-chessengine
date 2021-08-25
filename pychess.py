@@ -114,10 +114,21 @@ class Board:
         self.draw()
 
     def initialise_squares(self) -> None:
-        """ A method for creating the squares of the board. """
+        """ A method for creating the squares of the board, assigning the canvas and colour of the square. """
         for row in range(8):
             for col in range(8):
-                self.squares.append(Square(col, row))
+                _temp_square = Square(col, row)
+                _temp_square.colour = "linen" if (col + row) % 2 == 0 else "PaleVioletRed3"
+                _temp_square.canvas = tk.Canvas(window.board_frame, width=50, height=50, bg=_temp_square.colour)
+                _temp_square.canvas.config(bd=0, highlightthickness=0, relief='ridge')
+
+                # Binds commands to the canvas
+                _temp_square.canvas.bind("<Button-1>", lambda e, s=_temp_square: square_clicked(e, s))
+                _temp_square.canvas.bind("<Button-3>", lambda e: clear_move())
+
+                _temp_square.canvas.grid(row=row, column=col)
+
+                self.squares.append(_temp_square)
 
     def draw(self) -> None:
         """
@@ -126,33 +137,19 @@ class Board:
         It uses the Board.squares list and draws each of them, iterating through rows and columns and
         fetching each square. It then assigns the colour of the square, creates and assigns a canvas,
         binds the functions on clicking to the canvases, and then draws the piece.
-
-        Todo:
-            * Creating a new canvas and re-assigning the colours every time the board updates seems
-            * inefficient, perhaps separate some functionality into Board.initialise_squares()?
         """
         for row in range(8):
             for col in range(8):
                 # Fetches the correct square object to assign its canvas and to read its piece information for drawing
                 square = self.get_square(col, row)
-
-                # Determines the colour of each square
-                square.colour = "linen" if (col + row) % 2 == 0 else "PaleVioletRed3"
-
-                # Creates canvas to represent each square of the correct colour
-                square.canvas = tk.Canvas(window.board_frame, width=50, height=50, bg=square.colour, bd=0,
-                                          highlightthickness=0, relief='ridge')
-
-                # Binds commands to the canvas
-                square.canvas.bind("<Button-1>", lambda e, s=square: square_clicked(e, s))
-                square.canvas.bind("<Button-3>", lambda e: clear_move())
+                square.canvas.delete("all")
+                square.canvas.config(bg=square.colour)
 
                 # If a piece exists it places it
                 if square.piece is not None:
                     colour = "w" if square.piece.colour == WHITE else "b"
                     piece = colour + square.piece.piece_type + ".png"
                     square.canvas.create_image(24, 25, image=images[piece])
-                square.canvas.grid(row=row, column=col)
 
     def get_square(self, col: int, row: int) -> Square:
         """
