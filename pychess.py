@@ -6,7 +6,6 @@ import pathlib
 
 # Global variables
 FEN = "rnbqkbnr/pPpppppp/8/8/8/8/PpPPPPPP/RNBQKBNR w KQkq - 0 1"
-move_from = None
 BLACK = -1
 WHITE = 1
 en_passant_flag = None
@@ -101,12 +100,14 @@ class Board:
     Attributes:
         squares (list): The list of all 64 squares on the board. Created in Board.initialise_squares().
         turn (int): Which colour's turn it is; WHITE = 1, BLACK = -1 (default: 1).
+        move_from (Square): The move from square used for user inputting moves (default: None).
     """
 
     def __init__(self):
         """ Initialises the Board class. """
         self.squares = []
         self.turn = WHITE
+        self.move_from = None
 
         self.initialise_squares()
         self.read_fen(FEN)
@@ -364,35 +365,29 @@ def square_clicked(event: tk.Event, square: Square) -> None:
             when highlighting legal moves.
     """
     square = board.get_square(square.col, square.row)
-    global move_from
-    if move_from is None:
+
+    if board.move_from is None:
         square.canvas.config(bg="red")
-        move_from = square
+        board.move_from = square
 
         for squ in board.squares:
-            if move_from is not squ:
-                if Move(move_from, squ).is_legal():
+            if board.move_from is not squ:
+                if Move(board.move_from, squ).is_legal():
                     squ.canvas.create_oval(20, 20, 30, 30, fill="orange")
 
     else:
-        if move_from == square:
-            move_from = None
+        if board.move_from == square:
+            board.move_from = None
             board.draw()
             return
-        Move(move_from, square).make_move()
-        move_from = None
+        Move(board.move_from, square).make_move()
+        board.move_from = None
         board.draw()
 
 
 def clear_move() -> None:
-    """Function to clear the global make_move variable, used in square_clicked().
-
-    Todo:
-        * move_from could be one of board's variables instead of global?
-    """
-    global move_from
-    move_from = None
-
+    """ A function to clear the global make_move variable, used in square_clicked(). """
+    board.move_from = None
     board.draw()
 
 
