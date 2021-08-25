@@ -82,8 +82,7 @@ class Move:
 
             self.square_to.piece = self.square_from.piece
             self.square_from.piece = None
-            board.draw()
-            board.turn = board.turn * -1
+            board.turn = - board.turn
 
             # This flags the en passant square
             global en_passant_flag
@@ -458,7 +457,7 @@ def cancel_promotion(move, w, other_piece) -> None:
     move.square_from.piece = move.square_to.piece  # Swaps pieces
     move.square_to.piece = other_piece
 
-    board.turn = board.turn * -1
+    board.turn = - board.turn
     board.draw()
 
 
