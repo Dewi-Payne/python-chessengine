@@ -314,7 +314,7 @@ def check_legality(move: Move) -> bool:
     return False
 
 
-def sliding_move(square: Square, col_offset: int, row_offset: int, original_square: Square = None) -> list[Square]:
+def sliding_move(square: Square, col_offset: int, row_offset: int, original_square: Square = None) -> list:
     """
     A function to calculate a list of squares a sliding piece can move to in a line with a given offset direction,
     for both straight and diagonal moving pieces.
