@@ -135,17 +135,19 @@ class Board:
         A method that draws the board.
 
         It uses the Board.squares list and draws each of them, iterating through rows and columns and
-        fetching each square. It then assigns the colour of the square, creates and assigns a canvas,
-        binds the functions on clicking to the canvases, and then draws the piece.
+        fetching each square. It then assigns the colour of the square, clears the canvas, and then draws
+        a piece if one exists there.
         """
         for row in range(8):
             for col in range(8):
                 # Fetches the correct square object to assign its canvas and to read its piece information for drawing
                 square = self.get_square(col, row)
+
+                # Resets the appearance of the canvas.
                 square.canvas.delete("all")
                 square.canvas.config(bg=square.colour)
 
-                # If a piece exists it places it
+                # If a piece exists it fetches its image and draws it on the canvas.
                 if square.piece is not None:
                     colour = "w" if square.piece.colour == WHITE else "b"
                     piece = colour + square.piece.piece_type + ".png"
