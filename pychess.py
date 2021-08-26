@@ -63,7 +63,7 @@ class Move:
         self.square_from = board.get_square(square_from.col, square_from.row)
         self.square_to = board.get_square(square_to.col, square_to.row)
 
-    def is_legal(self):
+    def is_legal(self) -> bool:
         """Method to check if a Move object is legal, using the check_legality function and checking
          what player's turn it is."""
         if self.square_from.piece is None:
@@ -73,7 +73,7 @@ class Move:
         else:
             return False
 
-    def make_move(self):
+    def make_move(self) -> None:
         """Method for executing a move with a given Move object on the board, given a legal Move."""
         if self.is_legal():
             if self.square_to.row == 0 or self.square_to.row == 7:
@@ -82,8 +82,7 @@ class Move:
 
             self.square_to.piece = self.square_from.piece
             self.square_from.piece = None
-            board.draw()
-            board.turn = board.turn * -1
+            board.turn = - board.turn
 
             # This flags the en passant square
             global en_passant_flag
@@ -113,48 +112,47 @@ class Board:
         self.read_fen(FEN)
         self.draw()
 
-    def initialise_squares(self):
-        """ A method for creating the squares of the board. """
+    def initialise_squares(self) -> None:
+        """ A method for creating the squares of the board, assigning the canvas and colour of the square. """
         for row in range(8):
             for col in range(8):
-                self.squares.append(Square(col, row))
+                _temp_square = Square(col, row)
+                _temp_square.colour = "linen" if (col + row) % 2 == 0 else "PaleVioletRed3"
+                _temp_square.canvas = tk.Canvas(window.board_frame, width=50, height=50, bg=_temp_square.colour)
+                _temp_square.canvas.config(bd=0, highlightthickness=0, relief='ridge')
 
-    def draw(self):
+                # Binds commands to the canvas
+                _temp_square.canvas.bind("<Button-1>", lambda e, s=_temp_square: square_clicked(e, s))
+                _temp_square.canvas.bind("<Button-3>", lambda e: clear_move())
+
+                _temp_square.canvas.grid(row=row, column=col)
+
+                self.squares.append(_temp_square)
+
+    def draw(self) -> None:
         """
         A method that draws the board.
 
         It uses the Board.squares list and draws each of them, iterating through rows and columns and
-        fetching each square. It then assigns the colour of the square, creates and assigns a canvas,
-        binds the functions on clicking to the canvases, and then draws the piece.
-
-        Todo:
-            * Creating a new canvas and re-assigning the colours every time the board updates seems
-            * inefficient, perhaps separate some functionality into Board.initialise_squares()?
+        fetching each square. It then assigns the colour of the square, clears the canvas, and then draws
+        a piece if one exists there.
         """
         for row in range(8):
             for col in range(8):
                 # Fetches the correct square object to assign its canvas and to read its piece information for drawing
                 square = self.get_square(col, row)
 
-                # Determines the colour of each square
-                square.colour = "linen" if (col + row) % 2 == 0 else "PaleVioletRed3"
+                # Resets the appearance of the canvas.
+                square.canvas.delete("all")
+                square.canvas.config(bg=square.colour)
 
-                # Creates canvas to represent each square of the correct colour
-                square.canvas = tk.Canvas(window.board_frame, width=50, height=50, bg=square.colour, bd=0,
-                                          highlightthickness=0, relief='ridge')
-
-                # Binds commands to the canvas
-                square.canvas.bind("<Button-1>", lambda e, s=square: square_clicked(e, s))
-                square.canvas.bind("<Button-3>", lambda e: clear_move())
-
-                # If a piece exists it places it
+                # If a piece exists it fetches its image and draws it on the canvas.
                 if square.piece is not None:
                     colour = "w" if square.piece.colour == WHITE else "b"
                     piece = colour + square.piece.piece_type + ".png"
                     square.canvas.create_image(24, 25, image=images[piece])
-                square.canvas.grid(row=row, column=col)
 
-    def get_square(self, col: int, row: int):
+    def get_square(self, col: int, row: int) -> Square:
         """
         Returns a specific Square object belonging to Board.squares
         when given coordinates.
@@ -172,7 +170,7 @@ class Board:
                 return element
         return None
 
-    def read_fen(self, fen_string: str):
+    def read_fen(self, fen_string: str) -> None:
         """
         Reads a string in FEN format, and assigns relevant variables based off of what it reads.
         https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -218,7 +216,7 @@ class Board:
             pass
 
 
-def square_offset(square: Square, col: int, row: int):
+def square_offset(square: Square, col: int, row: int) -> Square:
     """A function that returns a square offset by a specified row and column values."""
     return board.get_square(square.col + col, square.row + row)
 
@@ -227,7 +225,7 @@ def en_passant(square_from):
     print(square_from)
 
 
-def check_legality(move: Move):
+def check_legality(move: Move) -> bool:
     """
     A function that takes in a Move object and returns if it is legal.
 
@@ -314,7 +312,7 @@ def check_legality(move: Move):
     return False
 
 
-def sliding_move(square: Square, col_offset: int, row_offset: int, original_square: Square = None):
+def sliding_move(square: Square, col_offset: int, row_offset: int, original_square: Square = None) -> list:
     """
     A function to calculate a list of squares a sliding piece can move to in a line with a given offset direction,
     for both straight and diagonal moving pieces.
@@ -348,7 +346,7 @@ def sliding_move(square: Square, col_offset: int, row_offset: int, original_squa
         return [temp_square] + sliding_move(temp_square, col_offset, row_offset, original_square)
 
 
-def square_clicked(event: tk.Event, square: Square):
+def square_clicked(event: tk.Event, square: Square) -> None:
     """
     A function which allows a player to make moves by clicking pieces on the board.
 
@@ -386,7 +384,7 @@ def square_clicked(event: tk.Event, square: Square):
         board.draw()
 
 
-def clear_move():
+def clear_move() -> None:
     """Function to clear the global make_move variable, used in square_clicked().
 
     Todo:
@@ -420,7 +418,7 @@ class Window:
                                  command=lambda: self.reset())
         reset_button.grid(row=1, column=0)
 
-    def reset(self):
+    def reset(self) -> None:
         """Resets the board to its original state."""
         board.squares.clear()
         board.initialise_squares()
@@ -428,7 +426,7 @@ class Window:
         board.draw()
 
 
-def promotion_window(move: Move, other_piece: Piece):
+def promotion_window(move: Move, other_piece: Piece) -> None:
     """ Function that displays pawn promotion options. """
 
     # Defines a list of pieces to promote to, for which ever colour is promoting.
@@ -453,17 +451,17 @@ def promotion_window(move: Move, other_piece: Piece):
     t.grid(row=1, column=0, columnspan=4)
 
 
-def cancel_promotion(move, w, other_piece):
+def cancel_promotion(move, w, other_piece) -> None:
     """Undoes piece promotion and closes the promotion window."""
     w.destroy()
     move.square_from.piece = move.square_to.piece  # Swaps pieces
     move.square_to.piece = other_piece
 
-    board.turn = board.turn * -1
+    board.turn = - board.turn
     board.draw()
 
 
-def promote_piece(move: Move, w: tk.Toplevel, piece: str):
+def promote_piece(move: Move, w: tk.Toplevel, piece: str) -> None:
     """Promotes a pawn to a piece given by the piece string."""
     move.square_to.piece.piece_type = piece
     board.draw()
