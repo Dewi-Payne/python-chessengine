@@ -8,7 +8,6 @@ import pathlib
 FEN = "rnbqkbnr/pPpppppp/8/8/8/8/PpPPPPPP/RNBQKBNR w KQkq - 0 1"
 BLACK = -1
 WHITE = 1
-en_passant_flag = None
 
 
 class Piece:
@@ -84,13 +83,12 @@ class Move:
             board.turn = - board.turn
 
             # This flags the en passant square
-            global en_passant_flag
             if self.square_from.row == 1 or self.square_from.row == 6:
                 if self.square_from == square_offset(self.square_to, 0, + self.square_to.piece.colour * 2):
                     if self.square_to.piece.piece_type.lower() == "p":
-                        en_passant_flag = square_offset(self.square_to, 0, + self.square_to.piece.colour)
+                        board.en_passant_square = square_offset(self.square_to, 0, + self.square_to.piece.colour)
             else:
-                en_passant_flag = None
+                board.en_passant_square = None
 
 
 class Board:
@@ -101,6 +99,8 @@ class Board:
         squares (list): The list of all 64 squares on the board. Created in Board.initialise_squares().
         turn (int): Which colour's turn it is; WHITE = 1, BLACK = -1 (default: 1).
         move_from (Square): The move from square used for user inputting moves (default: None).
+        en_passant_square (Square):
+            A square that can be moved to if an en passant capture is possible (default: None).
     """
 
     def __init__(self):
@@ -108,6 +108,7 @@ class Board:
         self.squares = []
         self.turn = WHITE
         self.move_from = None
+        self.en_passant_square = None
 
         self.initialise_squares()
         self.read_fen(FEN)
@@ -222,10 +223,6 @@ def square_offset(square: Square, col: int, row: int) -> Square:
     return board.get_square(square.col + col, square.row + row)
 
 
-def en_passant(square_from):
-    print(square_from)
-
-
 def check_legality(move: Move) -> bool:
     """
     A function that takes in a Move object and returns if it is legal.
@@ -261,7 +258,6 @@ def check_legality(move: Move) -> bool:
         if move.square_to == square_offset(move.square_from, 0, - move.square_from.piece.colour * 2):
             if move.square_to.piece is None:
                 if move.square_from.row == 6 or move.square_from.row == 1:
-                    en_passant(move.square_from)
                     return True
         # Capturing
         if move.square_to.piece is not None and move.square_to.piece.colour != move.square_from.colour:
@@ -270,7 +266,7 @@ def check_legality(move: Move) -> bool:
             if move.square_to == square_offset(move.square_from, -1, - move.square_from.piece.colour):
                 return True
         # Capturing en passant
-        if move.square_to == en_passant_flag:
+        if move.square_to == board.en_passant_square:
             if move.square_to == square_offset(move.square_from, -1, - move.square_from.piece.colour):
                 return True
             if move.square_to == square_offset(move.square_from, 1, - move.square_from.piece.colour):
