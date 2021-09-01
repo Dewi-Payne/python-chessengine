@@ -170,7 +170,6 @@ class Board:
         for element in self.squares:
             if element.col == col and element.row == row:
                 return element
-        return None
 
     def read_fen(self, fen_string: str) -> None:
         """
@@ -187,35 +186,38 @@ class Board:
         """
         col = 0
         row = 0
-
-        fen = fen_string.split()
-        for char in fen[0]:
-            if (char == "/") or (col >= 9):
-                # Skips to the next row if the character is a slash
-                col = 0
-                row += 1
-                continue
-            if char.isdigit():
-                # If the FEN string has a number, skip that many columns over
-                col += int(char)
-            else:
-                # This part creates the piece object and assigns it to the correct square
-                piece_type = char
-                square = self.get_square(col, row)
-                col += 1
-                if char.isupper():
-                    colour = WHITE
+        try:
+            fen = fen_string.split()
+            for char in fen[0]:
+                if (char == "/") or (col >= 9):
+                    # Skips to the next row if the character is a slash
+                    col = 0
+                    row += 1
+                    continue
+                if char.isdigit():
+                    # If the FEN string has a number, skip that many columns over
+                    col += int(char)
                 else:
-                    colour = BLACK
-                square.piece = Piece(colour, piece_type)
+                    # This part creates the piece object and assigns it to the correct square
+                    piece_type = char
+                    square = self.get_square(col, row)
+                    col += 1
+                    if char.isupper():
+                        colour = WHITE
+                    else:
+                        colour = BLACK
+                    square.piece = Piece(colour, piece_type)
 
-        if fen[1] == "w":
-            self.turn = WHITE
-        elif fen[1] == "b":
-            self.turn = BLACK
+            if fen[1] == "w":
+                self.turn = WHITE
+            elif fen[1] == "b":
+                self.turn = BLACK
 
-        for char in fen[2]:
-            pass
+            for char in fen[2]:
+                pass
+
+        except IndexError:
+            print("Error: FEN string cannot be empty.")
 
 
 def square_offset(square: Square, col: int, row: int) -> Square:
@@ -402,8 +404,10 @@ class Window:
         bottom_left_frame = tk.Frame(root, width=420, height=200)
         bottom_left_frame.grid(row=1, column=0)
 
-        fen_string_entry = tk.Entry(bottom_left_frame, width=40, relief="flat", bd=4)
+        fen_string_entry = tk.Entry(bottom_left_frame, width=40, relief="flat", bd=4, text=FEN)
         fen_string_entry.grid(row=0, column=0)
+        fen_load_button = tk.Button(bottom_left_frame, command = lambda: board.read_fen(fen_string_entry.get()))
+        fen_load_button.grid(row=0, column=1)
 
         reset_button = tk.Button(bottom_left_frame, width=10, relief="groove", pady=10, text="Reset",
                                  command=lambda: self.reset())
