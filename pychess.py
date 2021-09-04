@@ -204,6 +204,10 @@ class Board:
             fen += "w"
         return fen
 
+    def reset_pieces(self):
+        for square in self.squares:
+            square.piece = None
+
     def read_fen(self, fen_string: str) -> None:
         """
         Reads a string in FEN format, and assigns relevant variables based off of what it reads.
@@ -217,6 +221,8 @@ class Board:
             * Castling rights.
             * Remaining values at the bottom of this function.
         """
+        self.reset_pieces()
+
         col = 0
         row = 0
         try:
@@ -422,9 +428,14 @@ def clear_move() -> None:
     board.draw()
 
 
-def insert_fen(entry):
+def insert_fen(entry: tk.Entry):
     entry.delete(1.0, tk.END)
     entry.insert(1.0, board.generate_fen())
+
+
+def read_fen(fen: str):
+    board.read_fen(fen)
+    board.draw()
 
 
 class Window:
@@ -446,8 +457,7 @@ class Window:
         fen_string_entry.insert(1.0, FEN)
         fen_string_entry.grid(row=0, column=0)
 
-        fen_load_button = tk.Button(bottom_left_frame,
-                                    command=lambda: board.read_fen(fen_string_entry.get(1.0, tk.END)))
+        fen_load_button = tk.Button(bottom_left_frame, command=lambda: read_fen(fen_string_entry.get(1.0, tk.END)))
         fen_load_button.config(text="Read FEN")
         fen_load_button.grid(row=0, column=1)
 
