@@ -5,7 +5,7 @@ import os
 import pathlib
 
 # Global variables
-FEN = "rnbqkbnr/pPpppppp/8/8/8/8/PpPPPPPP/RNBQKBNR w KQkq - 0 1"
+FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 BLACK = -1
 WHITE = 1
 
@@ -110,6 +110,10 @@ class Board:
         self.move_from = None
         self.en_passant_square = None
 
+        # This stores the castling rights as a 4 digit binary number, 15 = default castling, 0 = no castling.
+        # Goes in the FEN castling order, KQkq (white king first, black queen last).
+        self.castling = format(15, "b")
+
         self.initialise_squares()
         self.read_fen(FEN)
         self.draw()
@@ -170,6 +174,35 @@ class Board:
         for element in self.squares:
             if element.col == col and element.row == row:
                 return element
+
+    def generate_fen(self) -> str:
+        fen = ""
+        column = 0
+        skip = 0
+        for square in self.squares:
+            if square.piece is not None:
+                if skip != 0:
+                    # This should insert the number value of empty squares to the FEN string
+                    fen += str(skip)  # This never triggers?
+                    skip = 0
+                fen += square.piece.piece_type  # Puts the piece character in the string if there's a piece
+            else:
+                skip += 1
+
+            # This bit adds the slashes at the end of each row
+            column += 1
+            if column == 8:
+                if skip != 0:
+                    # This should insert the number value of empty squares to the FEN string
+                    fen += str(skip)  # This never triggers?
+                    skip = 0
+                column = 0
+                fen += "/"
+        else:
+            fen = fen[:-1]
+            fen += " w " if board.turn == WHITE else " b "
+            fen += "w"
+        return fen
 
     def read_fen(self, fen_string: str) -> None:
         """
@@ -389,6 +422,11 @@ def clear_move() -> None:
     board.draw()
 
 
+def insert_fen(entry):
+    entry.delete(1.0, tk.END)
+    entry.insert(1.0, board.generate_fen())
+
+
 class Window:
     """A static class used for drawing the UI."""
     def __init__(self):
@@ -404,10 +442,18 @@ class Window:
         bottom_left_frame = tk.Frame(root, width=420, height=200)
         bottom_left_frame.grid(row=1, column=0)
 
-        fen_string_entry = tk.Entry(bottom_left_frame, width=40, relief="flat", bd=4, text=FEN)
+        fen_string_entry = tk.Text(bottom_left_frame, width=40, height=2, relief="flat", bd=4)
+        fen_string_entry.insert(1.0, FEN)
         fen_string_entry.grid(row=0, column=0)
-        fen_load_button = tk.Button(bottom_left_frame, command = lambda: board.read_fen(fen_string_entry.get()))
+
+        fen_load_button = tk.Button(bottom_left_frame,
+                                    command=lambda: board.read_fen(fen_string_entry.get(1.0, tk.END)))
+        fen_load_button.config(text="Read FEN")
         fen_load_button.grid(row=0, column=1)
+
+        fen_gen_button = tk.Button(bottom_left_frame, command=lambda: insert_fen(fen_string_entry))
+        fen_gen_button.config(text="Generate FEN")
+        fen_gen_button.grid(row=0, column=2)
 
         reset_button = tk.Button(bottom_left_frame, width=10, relief="groove", pady=10, text="Reset",
                                  command=lambda: self.reset())
