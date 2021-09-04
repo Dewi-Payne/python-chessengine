@@ -118,6 +118,16 @@ class Board:
         self.read_fen(FEN)
         self.draw()
 
+    def generate_moves(self) -> list:
+        """Generates a list of all legal moves with the current board position. """
+        moves = []
+        for square_from in self.squares:
+            for square_to in self.squares:
+                _move = Move(square_from, square_to)
+                if _move.is_legal():
+                    moves.append(_move)
+        return moves
+
     def initialise_squares(self) -> None:
         """ A method for creating the squares of the board, assigning the canvas and colour of the square. """
         for row in range(8):
@@ -406,11 +416,11 @@ def square_clicked(event: tk.Event, square: Square) -> None:
     if board.move_from is None:
         square.canvas.config(bg="red")
         board.move_from = square
-
-        for squ in board.squares:
-            if board.move_from is not squ:
-                if Move(board.move_from, squ).is_legal():
-                    squ.canvas.create_oval(20, 20, 30, 30, fill="orange")
+        # ==========================================================================================================
+        moves = board.generate_moves()
+        for move in moves:
+            if move.square_from == board.move_from:
+                move.square_to.canvas.create_oval(20, 20, 30, 30, fill="orange")
 
     else:
         if board.move_from == square:
