@@ -82,11 +82,16 @@ class Move:
             self.square_from.piece = None
             board.turn = - board.turn
 
+            if self.square_to == board.en_passant_square:
+                if self.square_to.piece.piece_type.lower() == "p":
+                    taken = square_offset(self.square_to, 0, + self.square_to.piece.colour)
+                    taken.piece = None
+
             # This flags the en passant square
-            if self.square_from.row == 1 or self.square_from.row == 6:
-                if self.square_from == square_offset(self.square_to, 0, + self.square_to.piece.colour * 2):
-                    if self.square_to.piece.piece_type.lower() == "p":
-                        board.en_passant_square = square_offset(self.square_to, 0, + self.square_to.piece.colour)
+            if self.square_from == square_offset(self.square_to, 0, + self.square_to.piece.colour * 2):
+                if self.square_to.piece.piece_type.lower() == "p":
+                    # If a pawn moves two squares, sets the en passant square to be the one behind it.
+                    board.en_passant_square = square_offset(self.square_to, 0, + self.square_to.piece.colour)
             else:
                 board.en_passant_square = None
 
