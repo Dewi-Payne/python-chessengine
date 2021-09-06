@@ -90,6 +90,8 @@ class Move:
             else:
                 board.en_passant_square = None
 
+            board.generate_moves()  # Re-calculates legal moves after one is made.
+
 
 class Board:
     """
@@ -106,6 +108,7 @@ class Board:
     def __init__(self):
         """ Initialises the Board class. """
         self.squares = []
+        self.moves = []
         self.turn = WHITE
         self.move_from = None
         self.en_passant_square = None
@@ -120,13 +123,12 @@ class Board:
 
     def generate_moves(self) -> list:
         """Generates a list of all legal moves with the current board position. """
-        moves = []
+        self.moves.clear()
         for square_from in self.squares:
             for square_to in self.squares:
                 _move = Move(square_from, square_to)
                 if _move.is_legal():
-                    moves.append(_move)
-        return moves
+                    self.moves.append(_move)
 
     def initialise_squares(self) -> None:
         """ A method for creating the squares of the board, assigning the canvas and colour of the square. """
@@ -417,8 +419,7 @@ def square_clicked(event: tk.Event, square: Square) -> None:
         square.canvas.config(bg="red")
         board.move_from = square
         # ==========================================================================================================
-        moves = board.generate_moves()
-        for move in moves:
+        for move in board.moves:
             if move.square_from == board.move_from:
                 move.square_to.canvas.create_oval(20, 20, 30, 30, fill="orange")
 
@@ -485,6 +486,8 @@ class Window:
         board.initialise_squares()
         board.read_fen(FEN)
         board.draw()
+        board.generate_moves()
+
 
 
 def promotion_window(move: Move, other_piece: Piece) -> None:
@@ -545,5 +548,6 @@ if __name__ == "__main__":
 
     # Creates the main board whose __init__ method has calls to other functions to initialise the game
     board = Board()
+    board.generate_moves()
 
     root.mainloop()
