@@ -80,6 +80,16 @@ class Move:
 
             self.square_to.piece = self.square_from.piece
             self.square_from.piece = None
+
+            board.generate_moves()  # Re-calculates legal moves after one is made.
+
+            board.check.clear()
+            for _move in board.moves:
+                if _move.square_to.piece is not None:
+                    if _move.square_to.piece.piece_type.lower() == "k":
+                        board.check.append(_move.square_to)
+                        break
+
             board.turn = - board.turn
 
             if self.square_to == board.en_passant_square:
@@ -117,6 +127,7 @@ class Board:
         self.turn = WHITE
         self.move_from = None
         self.en_passant_square = None
+        self.check = []
 
         # This stores the castling rights as a 4 digit binary number, 15 = default castling, 0 = no castling.
         # Goes in the FEN castling order, KQkq (white king first, black queen last).
@@ -126,7 +137,7 @@ class Board:
         self.read_fen(FEN)
         self.draw()
 
-    def generate_moves(self) -> list:
+    def generate_moves(self):
         """Generates a list of all legal moves with the current board position. """
         self.moves.clear()
         for square_from in self.squares:
@@ -134,6 +145,25 @@ class Board:
                 _move = Move(square_from, square_to)
                 if _move.is_legal():
                     self.moves.append(_move)
+
+        """
+        Commented out for being slow and not working
+        
+        for move in self.moves:
+            move.square_to.piece, move.square_from.piece = move.square_from.piece, move.square_to.piece
+            self.turn = -self.turn
+            for _from in self.squares:
+                for _to in self.squares:
+                    _move = Move(_from, _to)
+                    if _move.is_legal():
+                        if _move.square_to.piece is not None:
+                            if _move.square_to.piece.piece_type.lower() == "k":
+                                try:
+                                    self.moves.remove(move)
+                                except:
+                                    print("error")
+            move.square_to.piece, move.square_from.piece = move.square_from.piece, move.square_to.piece
+            self.turn = -self.turn"""
 
     def initialise_squares(self) -> None:
         """ A method for creating the squares of the board, assigning the canvas and colour of the square. """
@@ -174,6 +204,9 @@ class Board:
                     colour = "w" if square.piece.colour == WHITE else "b"
                     piece = colour + square.piece.piece_type + ".png"
                     square.canvas.create_image(24, 25, image=images[piece])
+
+                for square in self.check:
+                    square.canvas.config(bg="yellow")
 
     def get_square(self, col: int, row: int) -> Square:
         """
@@ -444,9 +477,9 @@ def clear_move() -> None:
     board.draw()
 
 
-def insert_fen(entry: tk.Entry):
-    entry.delete(1.0, tk.END)
-    entry.insert(1.0, board.generate_fen())
+def insert_text(textbox: tk.Text, text: str):
+    textbox.delete(1.0, tk.END)
+    textbox.insert(1.0, text)
 
 
 def read_fen(fen: str):
@@ -477,7 +510,8 @@ class Window:
         fen_load_button.config(text="Read FEN")
         fen_load_button.grid(row=0, column=1)
 
-        fen_gen_button = tk.Button(bottom_left_frame, command=lambda: insert_fen(fen_string_entry))
+        fen_gen_button = tk.Button(bottom_left_frame,
+                                   command=lambda: insert_text(fen_string_entry,board.generate_fen()))
         fen_gen_button.config(text="Generate FEN")
         fen_gen_button.grid(row=0, column=2)
 
